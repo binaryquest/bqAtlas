@@ -51,7 +51,9 @@ jobs:
           ACCEPT_EULA: Y
           MSSQL_SA_PASSWORD: BqAtlas-CI-only!123
         ports: ['21433:1433']
-        options: --health-cmd '/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "BqAtlas-CI-only!123" -Q "SELECT 1"' --health-interval 10s --health-retries 20
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'BqAtlas-CI-only!123' -Q 'SELECT 1'"
+          --health-interval 10s --health-retries 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
