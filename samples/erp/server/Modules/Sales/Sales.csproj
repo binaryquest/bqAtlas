@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><IsPackable>false</IsPackable></PropertyGroup><ItemGroup>
+<FrameworkReference Include="Microsoft.AspNetCore.App" />
+<ProjectReference Include="../Sales.Contracts/Sales.Contracts.csproj" />
+<ProjectReference Include="../Crm.Contracts/Crm.Contracts.csproj" />
+<ProjectReference Include="../../../../../backend/src/BqAtlas.EntityFrameworkCore/BqAtlas.EntityFrameworkCore.csproj" />
+<ProjectReference Include="../../../../../backend/src/BqAtlas.AspNetCore/BqAtlas.AspNetCore.csproj" />
+</ItemGroup></Project>

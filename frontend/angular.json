@@ -1,0 +1,82 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "cli": {
+    "analytics": false,
+    "cache": {
+      "enabled": false
+    }
+  },
+  "projects": {
+    "ui": {
+      "projectType": "library",
+      "root": "projects/ui",
+      "sourceRoot": "projects/ui/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/ui/ng-package.json",
+            "tsConfig": "projects/ui/tsconfig.lib.json"
+          }
+        }
+      }
+    },
+    "angular": {
+      "projectType": "library",
+      "root": "projects/angular",
+      "sourceRoot": "projects/angular/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:ng-packagr",
+          "options": {
+            "project": "projects/angular/ng-package.json",
+            "tsConfig": "projects/angular/tsconfig.lib.json"
+          }
+        }
+      }
+    },
+    "erp": {
+      "projectType": "application",
+      "root": "projects/erp",
+      "sourceRoot": "projects/erp/src",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "outputPath": "dist/erp",
+            "index": "projects/erp/src/index.html",
+            "browser": "projects/erp/src/main.ts",
+            "tsConfig": "projects/erp/tsconfig.app.json",
+            "styles": [
+              "projects/erp/src/styles.css"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular/build:dev-server",
+          "options": {
+            "proxyConfig": "projects/erp/proxy.conf.json",
+            "prebundle": false
+          },
+          "configurations": {
+            "development": {
+              "buildTarget": "erp:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        }
+      }
+    }
+  }
+}

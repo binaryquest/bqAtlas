@@ -1,0 +1,29 @@
+<Solution>
+  <Folder Name="/backend/" />
+  <Folder Name="/backend/src/">
+    <Project Path="backend/src/BqAtlas.AspNetCore/BqAtlas.AspNetCore.csproj" />
+    <Project Path="backend/src/BqAtlas.Core/BqAtlas.Core.csproj" />
+    <Project Path="backend/src/BqAtlas.EntityFrameworkCore/BqAtlas.EntityFrameworkCore.csproj" />
+    <Project Path="backend/src/BqAtlas.Identity/BqAtlas.Identity.csproj" />
+    <Project Path="backend/src/BqAtlas.OData/BqAtlas.OData.csproj" />
+  </Folder>
+  <Folder Name="/backend/tests/">
+    <Project Path="backend/tests/BqAtlas.IntegrationTests/BqAtlas.IntegrationTests.csproj" />
+    <Project Path="backend/tests/BqAtlas.Tests/BqAtlas.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/" />
+  <Folder Name="/samples/erp/" />
+  <Folder Name="/samples/erp/server/">
+    <Project Path="samples/erp/server/Host/Host.csproj" />
+  </Folder>
+  <Folder Name="/samples/erp/server/Migrations/">
+    <Project Path="samples/erp/server/Migrations/PostgreSql/PostgreSql.csproj" />
+    <Project Path="samples/erp/server/Migrations/SqlServer/SqlServer.csproj" />
+  </Folder>
+  <Folder Name="/samples/erp/server/Modules/">
+    <Project Path="samples/erp/server/Modules/Crm.Contracts/Crm.Contracts.csproj" />
+    <Project Path="samples/erp/server/Modules/Crm/Crm.csproj" />
+    <Project Path="samples/erp/server/Modules/Sales.Contracts/Sales.Contracts.csproj" />
+    <Project Path="samples/erp/server/Modules/Sales/Sales.csproj" />
+  </Folder>
+</Solution>

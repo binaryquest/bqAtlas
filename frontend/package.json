@@ -1,0 +1,39 @@
+{
+  "name": "bqatlas-workspace",
+  "version": "0.1.0-alpha.1",
+  "private": true,
+  "scripts": {
+    "build:contracts": "tsc -p projects/contracts/tsconfig.json && node scripts/copy-contracts.mjs",
+    "build:ui": "ng build ui && node scripts/link-package.mjs ui",
+    "build:angular": "ng build angular && node scripts/link-package.mjs angular",
+    "build:libs": "npm run build:contracts && npm run build:ui && npm run build:angular",
+    "build": "npm run build:libs && ng build erp",
+    "start": "ng serve erp --host 127.0.0.1 --port 4200",
+    "test": "npm run build:libs && node --import ./tests/register.mjs --test tests/*.test.mjs",
+    "pack:libs": "npm run build:libs && node scripts/pack.mjs"
+  },
+  "dependencies": {
+    "@angular/common": "22.1.7",
+    "@angular/compiler": "22.1.7",
+    "@angular/core": "22.1.7",
+    "@angular/forms": "22.1.7",
+    "@angular/platform-browser": "22.1.7",
+    "pdfjs-dist": "^6.3.289",
+    "rxjs": "7.8.2",
+    "tslib": "2.8.1"
+  },
+  "devDependencies": {
+    "@angular/build": "22.1.8",
+    "@angular/cli": "22.1.8",
+    "@angular/compiler-cli": "22.1.7",
+    "@tailwindcss/postcss": "4.3.3",
+    "ng-packagr": "22.1.1",
+    "postcss": "8.5.6",
+    "prettier": "3.6.2",
+    "tailwindcss": "4.3.3",
+    "typescript": "~6.0.0"
+  },
+  "engines": {
+    "node": ">=24.15.0"
+  }
+}

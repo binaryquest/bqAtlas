@@ -1,0 +1,29 @@
+{
+  "name": "@bqatlas/contracts",
+  "version": "0.1.0-alpha.1",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schemas/*": "./dist/schemas/*"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "SOURCE-NOTICE.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/binaryquest/bqAtlas.git",
+    "directory": "frontend/projects/contracts"
+  },
+  "homepage": "https://github.com/binaryquest/bqAtlas#readme",
+  "bugs": {
+    "url": "https://github.com/binaryquest/bqAtlas/issues"
+  }
+}

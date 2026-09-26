@@ -1,0 +1,4 @@
+<Project>
+<PropertyGroup><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><Version>0.1.0-alpha.1</Version><Authors>Binary Quest</Authors><Description>bqAtlas modular ERP application framework</Description><Deterministic>true</Deterministic><TreatWarningsAsErrors>true</TreatWarningsAsErrors><NuGetAudit>true</NuGetAudit><PackageLicenseExpression>MIT</PackageLicenseExpression><RepositoryUrl>https://github.com/binaryquest/bqAtlas</RepositoryUrl><RepositoryType>git</RepositoryType><PackageProjectUrl>https://github.com/binaryquest/bqAtlas</PackageProjectUrl></PropertyGroup>
+<ItemGroup><None Include="$(MSBuildThisFileDirectory)LICENSE" Pack="true" PackagePath="/" /></ItemGroup>
+</Project>

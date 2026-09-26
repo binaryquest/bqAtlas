@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:18.4-trixie
+    ports: ["127.0.0.1:25432:5432"]
+    environment:
+      POSTGRES_USER: bqatlas
+      POSTGRES_DB: bqatlas
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run node scripts/setup-dev.mjs first}
+    volumes: [postgres-data:/var/lib/postgresql]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bqatlas -d bqatlas"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.0
+    profiles: [oidc]
+    command: [start-dev, --import-realm]
+    ports: ["127.0.0.1:28080:8080"]
+    environment:
+      KC_HOSTNAME: http://localhost:28080
+    volumes:
+      - ./artifacts/keycloak:/opt/keycloak/data/import:ro
+      - keycloak-data:/opt/keycloak/data
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    profiles: [sqlserver]
+    ports: ["127.0.0.1:21433:1433"]
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-}
+    volumes: [sqlserver-data:/var/opt/mssql]
+volumes:
+  keycloak-data:
+  sqlserver-data:
+  postgres-data:

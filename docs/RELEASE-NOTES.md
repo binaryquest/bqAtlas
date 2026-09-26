@@ -1,0 +1,11 @@
+# 0.1.0-alpha.1 — unpublished development preview
+
+This version is built locally and is not yet a public release. Local artifacts may be rebuilt while unpublished; a published version must never be replaced.
+
+The preview includes five framework NuGet packages, a full-stack template package, and four npm packages. The sample contains CRM metadata CRUD and a Sales quote aggregate, local Identity and external OIDC browser modes, opt-in bearer API scopes, separate database migration assemblies, and Atlas workspace integration.
+
+Recent changes include typed OData reads, decimal-string inputs, custom field components/validators, nested permission-aware menus, guarded close-all, detached-save isolation across session changes, active-task first-invalid-field focus, scaffold previews/source hashes and generated authorization tests. Local recovery/confirmation forms and a private development mail sink are included. Resource-spec generation supports seven scalar field types with backend/frontend tests and separate user-owned validation hooks. Explicit manifest-based regeneration preserves custom rules, refuses conflicts and retains rollback backups. Template substitution tokens are delimited to avoid rewriting framework type names.
+
+Package verification restores actual local artifacts into an isolated template and NuGet environment. It builds/tests both backend and frontend for all four generated database/auth combinations and runs generated module tests. Its report identifies artifact SHA-256 hashes. The configuration matrix does not prove SQL Server runtime behavior.
+
+Exact configured versions and qualification limits are listed in [COMPATIBILITY.md](COMPATIBILITY.md). Remaining release gates are tracked in [ACCEPTANCE.md](ACCEPTANCE.md). In particular, SQL Server runtime, remaining browser/accessibility flows and registry/license/provenance decisions remain open. This preview is not a production-ready ERP application or multi-tenant platform.

@@ -1,0 +1,41 @@
+import {spawnSync} from 'node:child_process';
+import {mkdirSync,readFileSync,writeFileSync,existsSync,cpSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {join} from 'node:path';
+import {artifactHashes} from './artifact-manifest.mjs';
+const review=process.argv.includes('--browser-review');
+if(process.argv.slice(2).some(arg=>arg!=='--browser-review'))throw new Error('Supported option: --browser-review');
+const root=fileURLToPath(new URL('..',import.meta.url));process.chdir(root);
+if(existsSync('.env'))process.loadEnvFile('.env');
+const provider=process.env.BQATLAS_TEST_PROVIDER??process.env.Database__Provider??'postgresql';
+const connection=process.env.BQATLAS_TEST_CONNECTION??process.env.ConnectionStrings__Application;
+if(!['postgresql','sqlserver'].includes(provider)||!connection)throw new Error('Configure BQATLAS_TEST_PROVIDER and BQATLAS_TEST_CONNECTION for a disposable server. The harness creates and drops only its uniquely named database.');
+const artifacts=artifactHashes(root),work=join(root,'artifacts','resource-runtime-'+Date.now());mkdirSync(work,{recursive:true});
+const env={...process.env,BQATLAS_TEST_PROVIDER:provider,BQATLAS_TEST_CONNECTION:connection,NUGET_PACKAGES:join(work,'nuget-cache'),BQATLAS_NODE:process.execPath,BQATLAS_PROVIDER_TEST_SCRIPT:join(work,'runtime/frontend-parity.mjs')};
+function run(command,args,cwd=work){const result=spawnSync(command,args,{cwd,env,stdio:'inherit'});if(result.status!==0)throw new Error(`${command} failed (${result.status}).`);}
+const nuget=join(root,'artifacts/nuget'),cli=join(root,'artifacts/npm/bqatlas-cli-0.1.0-alpha.1.tgz');
+writeFileSync(join(work,'NuGet.config'),`<?xml version="1.0" encoding="utf-8"?><configuration><packageSources><clear/><add key="bqatlas-local" value="${nuget}"/><add key="nuget" value="https://api.nuget.org/v3/index.json"/></packageSources><packageSourceMapping><packageSource key="bqatlas-local"><package pattern="BqAtlas.*"/></packageSource><packageSource key="nuget"><package pattern="*"/></packageSource></packageSourceMapping></configuration>`);
+run('npm',['install',cli,'--no-audit','--no-fund']);
+run(process.execPath,['node_modules/@bqatlas/cli/bin/bqatlas.mjs','generate','crud','--spec','node_modules/@bqatlas/cli/examples/product.resource.json','--out',join(work,'product')]);
+cpSync(join(root,'scripts/generated-resource-runtime'),join(work,'runtime'),{recursive:true});
+writeFileSync(join(work,'runtime/package.json'),JSON.stringify({private:true,type:'module',dependencies:{'@angular/compiler':'22.1.7','@angular/core':'22.1.7','@angular/common':'22.1.7','@angular/forms':'22.1.7'}},null,2));
+run('npm',['install',...['contracts','ui','angular'].map(name=>join(root,`artifacts/npm/bqatlas-${name}-0.1.0-alpha.1.tgz`)),'--no-audit','--no-fund'],join(work,'runtime'));
+if(review){
+ const consumer=join(work,'consumer'),hive=join(work,'template-cache');
+ run('dotnet',['new','install',join(nuget,'BqAtlas.Templates.0.1.0-alpha.1.nupkg'),'--debug:custom-hive',hive]);
+ run('dotnet',['new','bqatlas','--no-update-check','-n','ReviewErp','-o',consumer,'--debug:custom-hive',hive]);
+ cpSync(join(work,'product/client/feature.ts'),join(consumer,'client/projects/erp/src/generated-product.ts'));
+ cpSync(join(root,'scripts/generated-resource-runtime/browser-main.ts'),join(consumer,'client/projects/erp/src/main.ts'));
+ const spec=JSON.parse(readFileSync(join(work,'node_modules/@bqatlas/cli/examples/product.resource.json'),'utf8'));
+ const fields={id:{property:'Id',type:'guid'},...Object.fromEntries(spec.fields.map(field=>[field.name,{property:field.name[0].toUpperCase()+field.name.slice(1),type:['boolean','integer','decimal','date'].includes(field.type)?field.type:'string'}]))};
+ writeFileSync(join(consumer,'client/projects/erp/src/review-fields.ts'),'export const fields = '+JSON.stringify(fields)+' as const;');
+ run('npm',['install',...['contracts','ui','angular'].map(name=>join(root,`artifacts/npm/bqatlas-${name}-0.1.0-alpha.1.tgz`)),'--no-audit','--no-fund'],join(consumer,'client'));
+ run('npm',['run','build'],join(consumer,'client'));
+ env.BQATLAS_RESOURCE_WEBROOT=join(consumer,'client/dist/erp/browser');
+ env.BQATLAS_RESOURCE_REVIEW=join(work,'browser-review.json');
+ console.log(`Browser review will become available in ${env.BQATLAS_RESOURCE_REVIEW}; create its .done marker to finish and clean up.`);
+}
+run('dotnet',['test','runtime/RuntimeTests.csproj','--logger','trx;LogFileName=runtime.trx','--results-directory',join(work,'results')]);
+if(JSON.stringify(artifactHashes(root))!==JSON.stringify(artifacts))throw new Error('Artifacts changed during runtime verification.');
+writeFileSync(join(work,'verification.json'),JSON.stringify({passed:true,provider,artifacts,generatedFromPackagedCli:true,isolatedDatabase:true,generatedEfMapping:true,restCrud:true,odataTypedQueries:true,exactDecimalJson:true,permissionCsrfAndValidation:true,migrationsVerified:false,actualFrontendProviders:true,authenticationMode:'test-cookie (synthetic loopback test identities)'},null,2)+'\n');
+console.log(`Generated resource runtime verification passed: ${work}`);

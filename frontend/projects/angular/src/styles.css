@@ -1,0 +1,67 @@
+.bqatlas-view {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--atlas-surface, #fff);
+}
+.bqatlas-toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--atlas-border, #e2e8f0);
+  flex-shrink: 0;
+}
+.bqatlas-view atlas-table {
+  overflow: auto;
+  flex: 1;
+}
+.bqatlas-form {
+  padding: 24px;
+  overflow: auto;
+  flex: 1;
+}
+.bqatlas-form fieldset {
+  border: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+}
+.bqatlas-field {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 4px 12px;
+  align-items: center;
+}
+.bqatlas-field label {
+  font-weight: 600;
+  font-size: 12px;
+}
+.bqatlas-field input[type="checkbox"] {
+  justify-self: start;
+}
+.bqatlas-field-error {
+  grid-column: 2;
+  color: #b42318;
+  min-height: 0;
+}
+.bqatlas-record-status {
+  padding: 10px 20px;
+  border-top: 1px solid #e2e8f0;
+  color: #64748b;
+  font-size: 11px;
+}
+.bqatlas-view > .atlas-alert {
+  margin: 12px 16px;
+}
+.bqatlas-spacer {
+  flex: 1;
+}
+@media (max-width: 700px) {
+  .bqatlas-field {
+    grid-template-columns: 1fr;
+  }
+  .bqatlas-field-error {
+    grid-column: 1;
+  }
+}

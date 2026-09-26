@@ -1,0 +1,37 @@
+{
+  "name": "@bqatlas/ui",
+  "version": "0.1.0-alpha.1",
+  "peerDependencies": {
+    "@angular/common": "^22.1.7",
+    "@angular/core": "^22.1.7",
+    "@angular/forms": "^22.1.7",
+    "pdfjs-dist": "^6.3.289"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    "./theme.css": {
+      "style": "./src/theme.css",
+      "default": "./src/theme.css"
+    }
+  },
+  "license": "MIT",
+  "peerDependenciesMeta": {
+    "pdfjs-dist": {
+      "optional": true
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/binaryquest/bqAtlas.git",
+    "directory": "frontend/projects/ui"
+  },
+  "homepage": "https://github.com/binaryquest/bqAtlas#readme",
+  "bugs": {
+    "url": "https://github.com/binaryquest/bqAtlas/issues"
+  }
+}

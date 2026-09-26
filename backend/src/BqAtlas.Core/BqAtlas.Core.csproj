@@ -1,0 +1,1 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><IsPackable>true</IsPackable></PropertyGroup><ItemGroup></ItemGroup><PropertyGroup><PackageReadmeFile>README.md</PackageReadmeFile></PropertyGroup><ItemGroup><None Include="README.md" Pack="true" PackagePath="/" /><None Include="../../../docs/SOURCE-NOTICE.md" Pack="true" PackagePath="/SOURCE-NOTICE.md" /></ItemGroup></Project>

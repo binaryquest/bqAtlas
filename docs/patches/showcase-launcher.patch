@@ -1,0 +1,44 @@
+--- frontend/projects/erp/src/main.ts
++++ frontend/projects/erp/src/main.ts
+@@ -18,6 +18,7 @@
+ } from "@bqatlas/ui";
+ import { AtlasSession, CrudWorkspace, AtlasMenus, AtlasMenu, AtlasNavigation, AtlasPasswordChange, AtlasAccountRecovery, consumeAccountRecoveryLink } from "@bqatlas/angular";
+ import {CustomerCodeField,validateCustomerCode} from "./customer-code";
++import { Showcase } from "./showcase/showcase";
+ import { salesFeature } from "./sales/quote-views";
+ let initialRecoveryLink = consumeAccountRecoveryLink(window.location, window.history);
+ @Component({
+@@ -50,6 +51,7 @@
+               Open a view to find records and keep your work side by side.
+             </p>
+             <bqatlas-menu />
++            <button atlasButton class="showcase-launcher" (click)="openShowcase()">Explore forms & controls →</button>
+             @if (!crud.menus().length) {
+               <p>No views are available for this account.</p>
+             }
+@@ -151,6 +153,7 @@
+   password = "";
+   constructor() {
+     initialRecoveryLink = null;
++    this.workspace.register({id:"bqatlas.showcase",title:"Forms & controls",icon:"grid",component:Showcase,instance:"singleton",width:1120,height:780});
+     this.crud.register(
+       {
+         resource: "crm.customers",
+@@ -179,14 +182,16 @@
+       }
+     };
+     visit(this.menus.visible());
+-    return [...items, {id: 'workspace.close-all', label: 'Close all windows', icon: 'close', separatorBefore: true, disabled: !this.workspace.tasks().length || this.workspace.closingAll()}];
++    return [...items, {id:'workspace.showcase',label:'Forms & controls',icon:'grid',separatorBefore:true}, {id: 'workspace.close-all', label: 'Close all windows', icon: 'close', separatorBefore: true, disabled: !this.workspace.tasks().length || this.workspace.closingAll()}];
+   }
+   accountItems(): AtlasStartItem[] {
+     return [
+       {id: 'logout', label: 'Sign out', icon: 'arrow'},
+     ];
+   }
++  openShowcase() { this.workspace.open({screen:"bqatlas.showcase",data:{}}); }
+   async openStartItem(id: string) {
++    if (id === "workspace.showcase") { this.openShowcase(); return; }
+     this.error.set("");
+     if (id === 'workspace.close-all') { await this.workspace.requestCloseAll(); return; }
+     try { await this.menus.activate(id); } catch (error) { this.error.set(error instanceof Error ? error.message : 'Unable to open view.'); }

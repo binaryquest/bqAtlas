@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "module": "Inventory",
+  "entity": "Product",
+  "plural": "Products",
+  "resource": "inventory.products",
+  "title": "Products",
+  "key": {"name": "id", "type": "uuid"},
+  "permissions": {"read": "inventory.products.read", "write": "inventory.products.write", "delete": "inventory.products.delete", "lookup": "inventory.products.lookup"},
+  "fields": [
+    {"name": "sku", "label": "SKU", "type": "string", "required": true, "maxLength": 40, "default": ""},
+    {"name": "description", "label": "Description", "type": "string", "required": true, "maxLength": 200, "default": ""},
+    {"name": "contact", "label": "Supplier email", "type": "email", "required": false, "maxLength": 254, "default": ""},
+    {"name": "active", "label": "Active", "type": "boolean", "required": true, "default": true},
+    {"name": "reorderLevel", "label": "Reorder level", "type": "integer", "required": true, "default": 0},
+    {"name": "availableFrom", "label": "Available from", "type": "date", "required": true, "default": "2026-01-01"},
+    {"name": "category", "label": "Category", "type": "enum", "required": true, "options": ["Stock", "Service"], "default": "Stock"},
+    {"name": "unitPrice", "label": "Unit price", "type": "decimal", "required": true, "scale": 4, "maximum": "99999999999999.9999", "default": "0"}
+  ],
+  "list": {"fields": ["sku", "description", "category", "unitPrice", "active"], "sort": {"field": "sku", "direction": "asc"}},
+  "form": {"fields": ["sku", "description", "contact", "category", "unitPrice", "reorderLevel", "availableFrom", "active"]}
+}

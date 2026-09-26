@@ -1,0 +1,1500 @@
+[
+  {
+    "id": "datasheet",
+    "title": "Quotes datasheet",
+    "category": "Quotes datasheet",
+    "status": "R&D preview",
+    "summary": "Access-inspired continuous cell editing in a master/detail quote form. Every cell edits a signal-backed draft; Save commits the form and Cancel restores its last saved snapshot.",
+    "steps": [
+      "Edit customer and reference, then type directly into any line cell. No per-row Edit or Apply step is needed.",
+      "Open a product cell to compare code, product, unit, stock and price. Selecting it stores its key and fills the editable unit price.",
+      "Add line creates an empty product row. Remove changes only the draft; Cancel restores removed lines and all other edits.",
+      "Save validates the complete quote. Correct highlighted rows and retry. Simulate next save failure retains the draft after an API failure.",
+      "Drafts survive category and documentation switches. A dirty workspace window uses the existing unsaved changes guard. Data resets on gallery disposal or reload.",
+      "On small screens the sheet scrolls horizontally; touch targets follow the workspace density.",
+      "For another view, reuse AtlasDatasheet from @bqatlas/ui and supply your own columns and signal-backed draft store. The repository guide docs/atlas-controls/DATASHEET-INTEGRATION.md contains a complete inventory-count component, lookup integration, and an AI implementation checklist."
+    ],
+    "keyboard": [
+      "Tab / Shift+Tab move between editors, wrapping across rows. At the boundary normal Tab exits the sheet.",
+      "Up / Down move to the same column in the previous / next row without changing numeric values. Enter in an input moves down; Shift+Enter moves up.",
+      "Alt+Down or F4 opens a product lookup; Enter and Space also activate its button. Inside the popup arrows highlight, Enter selects, and Escape dismisses.",
+      "Left / Right move to the previous / next enabled editor in the same row, skipping read-only cells. They stop at row boundaries; Tab wraps rows. Shift+Left / Right retains native text selection. Ctrl/Cmd+Home / End focus the first / last editor."
+    ],
+    "api": [
+      {
+        "name": "AtlasDatasheet",
+        "type": "table[atlasDatasheet] directive",
+        "description": "Native table navigation. Consumer owns draft, validation, and persistence."
+      },
+      {
+        "name": "data-sheet-editor",
+        "type": "DOM marker",
+        "description": "Mark one native editor or AtlasLookup host per editable cell. Disabled editors are skipped. Keep the same logical columns across rows."
+      },
+      {
+        "name": "AtlasLookup.arrowNavigation",
+        "type": "\"open\" | \"grid\"; default \"open\"",
+        "description": "Use grid so plain vertical arrows bubble to the table. Alt+Down/F4 still open the lookup."
+      },
+      {
+        "name": "Table structure and scroll wrapper",
+        "type": "Integration contract",
+        "description": "Use one tbody with stable column positions. The immediate parent must have overflow:auto. Mark one primary editor per editable td; leave derived/read-only cells unmarked. Use page-unique lookup IDs."
+      }
+    ],
+    "example": "// Reuse the exported directive, not the quote component.\n// Import AtlasDatasheet in your standalone component imports.\n// Complete signal-based inventory example and lookup recipe:\n// docs/atlas-controls/DATASHEET-INTEGRATION.md\n<div style=\"overflow: auto; max-height: 420px\">\n  <table atlasDatasheet aria-label=\"Order lines\">\n    <thead><tr><th scope=\"col\">Note</th></tr></thead>\n    <tbody>@for (line of lines(); track line.id) {\n      <tr><td><input data-sheet-editor [value]=\"line.note\"\n        [attr.aria-label]=\"'Note, line ' + line.id\"\n        (input)=\"updateNote(line.id, $any($event.target).value)\" /></td></tr>\n    }</tbody>\n  </table>\n</div>",
+    "limits": [
+      "Local nonvirtualized data only. No range selection, clipboard matrix paste, undo history, or Excel formulas.",
+      "The quote uses signals and native inputs, not a general quote schema or persistence service. Totals round per line; no tax or production decimal arithmetic.",
+      "Mobile currently preserves table columns with horizontal scrolling rather than a separate line-card editor."
+    ]
+  },
+  {
+    "id": "lookup",
+    "title": "Multi-column lookup",
+    "category": "ERP controls",
+    "status": "R&D preview",
+    "summary": "Choose a business record using several columns while storing only its stable key. Useful for customer, product, warehouse, account, and invoice selection.",
+    "steps": [
+      "Open the field to compare code, name, city, and balance. On a phone, each row shows those values with labels.",
+      "Search any configured searchable column. Multiple words must all match the same record.",
+      "Click a row or press Enter to commit it. The field displays the customer name; the model stores its ID.",
+      "Use Clear to remove the selection. Searching or pressing Escape never commits the highlighted row.",
+      "Archived rows are disabled. Loading, failed requests with Retry, and no matches each have a separate state."
+    ],
+    "keyboard": [
+      "Tab focuses the field; Enter, Space, or an arrow key opens it.",
+      "The search field retains keyboard focus. Up/Down move through enabled records; Home/End select the first/last highlight.",
+      "Enter commits the highlighted record. Escape dismisses and returns focus. Tab dismisses and moves onward.",
+      "When results fail to load, Tab moves from search to Retry; Shift+Tab returns to search. Retry returns focus to search."
+    ],
+    "api": [
+      {
+        "name": "rows",
+        "type": "readonly T[]",
+        "description": "Source records. Each record must have a unique non-null key."
+      },
+      {
+        "name": "columns",
+        "type": "AtlasLookupColumn<T>[]",
+        "description": "key, label, optional width in px, alignment, format(row), and searchable flag."
+      },
+      {
+        "name": "recordKey / displayWith",
+        "type": "(row: T) => key / string",
+        "description": "Return the stored string/number key and human-readable selection text."
+      },
+      {
+        "name": "value / valueChange",
+        "type": "V | null",
+        "description": "Two-way model; null represents no selection."
+      },
+      {
+        "name": "formField",
+        "type": "FormField directive",
+        "description": "Connect a Signal Forms field. Import FormField from @angular/forms/signals."
+      },
+      {
+        "name": "rowDisabled",
+        "type": "(row: T) => boolean",
+        "description": "Prevents pointer and keyboard selection of a record."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Disabled blocks focus; readonly allows focus but blocks edits."
+      },
+      {
+        "name": "loading / error / retry",
+        "type": "boolean / string / output<void>",
+        "description": "Consumer owns data requests. Retry emits a request to the consumer."
+      },
+      {
+        "name": "popupWidth",
+        "type": "number, default 640",
+        "description": "Preferred width, clamped to viewport. Results adapt below 460px."
+      },
+      {
+        "name": "recordSelected",
+        "type": "output<T | null>",
+        "description": "Committed record, or null after clearing."
+      },
+      {
+        "name": "controlId / ariaLabel / describedBy",
+        "type": "string",
+        "description": "Unique ID, accessible name, optional help/error element ID."
+      },
+      {
+        "name": "invalid / touched / required",
+        "type": "boolean inputs",
+        "description": "Signal Forms supplies these. Invalid styling appears after touch."
+      },
+      {
+        "name": "arrowNavigation",
+        "type": "\"open\" | \"grid\", default \"open\"",
+        "description": "In grid mode plain Up/Down navigate the containing datasheet. Alt+Down/F4 open the popup."
+      }
+    ],
+    "example": "// Imports: signal from @angular/core; form, FormField, required from @angular/forms/signals;\n// AtlasLookup, AtlasLookupColumn from @bqatlas/ui. Add FormField and AtlasLookup to component imports.\ninterface Customer { id: string; name: string; city: string; }\nmodel = signal({ customerId: null as string | null });\nfields = form(this.model, s => required(s.customerId));\ncustomers: Customer[] = [{ id: 'C-001', name: 'Acme Studio', city: 'Dhaka' }];\ncolumns: AtlasLookupColumn<Customer>[] = [\n  { key: 'id', label: 'Code', width: 90 },\n  { key: 'name', label: 'Customer' },\n  { key: 'city', label: 'City', width: 110 },\n];\nkey = (row: Customer) => row.id;\nlabel = (row: Customer) => row.name;\n\n<atlas-lookup controlId=\"customer\" ariaLabel=\"Customer\"\n  [rows]=\"customers\" [columns]=\"columns\"\n  [recordKey]=\"key\" [displayWith]=\"label\"\n  [formField]=\"fields.customerId\" />",
+    "limits": [
+      "Local single selection only. Remote query output, server paging, virtualization, sorting, and editable popup cells are planned.",
+      "Keys must be unique strings or numbers; null is reserved for an empty value. Missing selected records show an unavailable-record label and retain the key.",
+      "Use [formField] OR [(value)], not both on the same instance. Existing CVA controls use their existing forms contract.",
+      "Modern browser Popover API is required. Screen-reader and multi-browser qualification remains outstanding."
+    ]
+  },
+  {
+    "id": "textarea",
+    "title": "Text area",
+    "category": "ERP controls",
+    "status": "R&D preview",
+    "summary": "Enter longer notes with a character counter and Signal Forms validation.",
+    "steps": [
+      "Type delivery instructions. The example allows up to 160 characters.",
+      "The count updates immediately. Resize vertically if you need more room.",
+      "Reset restores the initial value; disabling or making the form read-only prevents changes."
+    ],
+    "keyboard": [
+      "Tab focuses the textarea. Enter creates a new line. Tab leaves the field and marks it touched."
+    ],
+    "api": [
+      {
+        "name": "value",
+        "type": "model<string>",
+        "description": "Two-way text value; default empty string."
+      },
+      {
+        "name": "formField",
+        "type": "FormField directive",
+        "description": "Binds the signal field and its validation/availability state."
+      },
+      {
+        "name": "rows / showCount",
+        "type": "number / boolean",
+        "description": "Default 4 visible rows and visible character count."
+      },
+      {
+        "name": "maxLength",
+        "type": "number | undefined",
+        "description": "Native entry limit; Signal Forms can supply it from a schema."
+      },
+      {
+        "name": "controlId / ariaLabel / describedBy",
+        "type": "string",
+        "description": "Unique ID, accessible name and help/error association."
+      },
+      {
+        "name": "disabled / readonly / invalid / touched",
+        "type": "boolean inputs",
+        "description": "Availability and validation styling."
+      },
+      {
+        "name": "touch",
+        "type": "output<void>",
+        "description": "Emitted when focus leaves the native textarea."
+      }
+    ],
+    "example": "// Imports: AtlasTextarea and FormField in the component.\nnotes = signal({ text: '' });\nfields = form(this.notes, s => maxLength(s.text, 160));\n\n<atlas-textarea controlId=\"notes\" ariaLabel=\"Delivery notes\"\n  [formField]=\"fields.text\" />",
+    "limits": [
+      "Plain text only; rich text, automatic height growth and mention/tag editing are planned.",
+      "Native maxlength uses UTF-16 code units, not user-perceived Unicode grapheme counts."
+    ]
+  },
+  {
+    "id": "toggle",
+    "title": "Toggle switch",
+    "category": "ERP controls",
+    "status": "R&D preview",
+    "summary": "Set an immediate on/off preference, such as delivery notifications. Use a checkbox rather than a switch for a mandatory agreement.",
+    "steps": [
+      "Click the switch or its label to change the preference.",
+      "The switch uses the same signal model as the lookup and notes.",
+      "Read-only prevents changes while keeping it focusable; disabled prevents interaction."
+    ],
+    "keyboard": [
+      "Space or Enter toggles the focused switch. Tab moves to the next control."
+    ],
+    "api": [
+      {
+        "name": "checked",
+        "type": "model<boolean>",
+        "description": "Two-way boolean state, default false."
+      },
+      {
+        "name": "label / controlId",
+        "type": "required string inputs",
+        "description": "Visible accessible label and unique ID."
+      },
+      {
+        "name": "formField",
+        "type": "FormField directive",
+        "description": "Connects a boolean Signal Forms field."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Prevent interaction or editing."
+      },
+      {
+        "name": "touch",
+        "type": "output<void>",
+        "description": "Emitted when focus leaves the switch."
+      }
+    ],
+    "example": "// Imports: AtlasToggle and FormField in the component.\npreferences = signal({ notify: true });\nfields = form(this.preferences);\n\n<atlas-toggle controlId=\"notify\" label=\"Send delivery notifications\"\n  [formField]=\"fields.notify\" />",
+    "limits": [
+      "Boolean only; no indeterminate state. Checkbox/radio groups are available in Selection & entry."
+    ]
+  },
+  {
+    "id": "inputs",
+    "title": "Text, password and number inputs",
+    "category": "Inputs",
+    "status": "R&D preview",
+    "summary": "Compact form fields for references, email addresses, passwords, and amounts. Existing controls integrate with reactive forms through ControlValueAccessor.",
+    "steps": [
+      "Use Full name clear to remove the value, then Validate form to see required feedback.",
+      "Show/Hide reveals or masks the password.",
+      "Use the number step buttons or type an amount. Validators enforce the allowed range; prefixes/suffixes are display-only.",
+      "Reset restores the initial sample; Disable controls demonstrates form availability."
+    ],
+    "keyboard": [
+      "Native input editing and Tab navigation apply.",
+      "Number step buttons can be activated with Enter or Space."
+    ],
+    "api": [
+      {
+        "name": "AtlasTextInput",
+        "type": "standalone component",
+        "description": "type, icon, prefix, suffix, clearable, autocomplete, maxLength."
+      },
+      {
+        "name": "AtlasNumberInput",
+        "type": "standalone component",
+        "description": "min, max, step, prefix, suffix, showButtons."
+      },
+      {
+        "name": "controlId / ariaLabel",
+        "type": "string",
+        "description": "Unique native control ID and accessible name."
+      },
+      {
+        "name": "formControl / formControlName",
+        "type": "Angular reactive forms",
+        "description": "CVA propagates values, disabled state and touched status."
+      },
+      {
+        "name": "invalid / describedBy / readonly",
+        "type": "inputs",
+        "description": "Application supplies validation state, help association and readonly state."
+      }
+    ],
+    "example": "// Imports: ReactiveFormsModule, AtlasTextInput, AtlasNumberInput.\nreference = new FormControl('');\namount = new FormControl<number | null>(0);\n\n<atlas-text-input controlId=\"ref\" ariaLabel=\"Reference\" [formControl]=\"reference\" [clearable]=\"true\" />\n<atlas-number-input controlId=\"amount\" ariaLabel=\"Amount\" [formControl]=\"amount\" [min]=\"0\" [step]=\"0.5\" />",
+    "limits": [
+      "These original controls retain CVA APIs; native model/Signal Forms migration is planned. They already work in the zoneless gallery.",
+      "Signal-based decimal/currency and native date-range controls are available in Selection & entry. Masks remain planned."
+    ]
+  },
+  {
+    "id": "select",
+    "title": "Select",
+    "category": "Select",
+    "status": "R&D preview",
+    "summary": "Choose one value from a short list with optional descriptions and groups. Use the multi-column lookup when records need comparison across several fields.",
+    "steps": [
+      "Open Department and search Finance or another name.",
+      "Choose an option to commit its value. Clear removes the value and Validate selection demonstrates required feedback.",
+      "Archived options cannot be chosen; readonly and disabled examples demonstrate their differences."
+    ],
+    "keyboard": [
+      "Up/Down navigate enabled choices; Home/End jump to first/last.",
+      "Enter selects; Escape closes; Tab dismisses."
+    ],
+    "api": [
+      {
+        "name": "options",
+        "type": "AtlasOption<T>[]",
+        "description": "label, value, optional description, group, disabled."
+      },
+      {
+        "name": "filter / clearable",
+        "type": "boolean, default true",
+        "description": "Search box and clear action."
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Blocks opening while pending."
+      },
+      {
+        "name": "formControl / formControlName",
+        "type": "Angular reactive forms",
+        "description": "Stores the option value, not its display label."
+      },
+      {
+        "name": "controlId / ariaLabel / invalid / describedBy",
+        "type": "inputs",
+        "description": "Identity, accessible label and application validation."
+      }
+    ],
+    "example": "// Imports: ReactiveFormsModule, AtlasSelect.\ndepartment = new FormControl<string | null>(null);\noptions = [{ label: 'Finance', value: 'finance' }];\n\n<atlas-select controlId=\"department\" ariaLabel=\"Department\" [options]=\"options\" [formControl]=\"department\" />",
+    "limits": [
+      "Single selection only; multi-select and autocomplete are available in Selection & entry; remote search is planned.",
+      "Object option values are compared by identity; stable primitive keys are preferred."
+    ]
+  },
+  {
+    "id": "list",
+    "title": "List / grid view",
+    "category": "List view",
+    "status": "R&D preview",
+    "summary": "Browse a small collection as rows or cards, select a record, and activate it separately.",
+    "steps": [
+      "Switch between List and Grid layout. Search by record text.",
+      "Click a product to select it; double-click or Enter activates it.",
+      "Use pagination to move through the collection. Archived items remain unselectable."
+    ],
+    "keyboard": [
+      "Arrow keys, Home and End move focus among enabled items on the current page.",
+      "Enter activates the current item; Tab enters or leaves the collection."
+    ],
+    "api": [
+      {
+        "name": "items",
+        "type": "AtlasListItem[]",
+        "description": "id, title, optional description/meta/icon/badge/tone/disabled."
+      },
+      {
+        "name": "layout",
+        "type": "list | grid",
+        "description": "Presentation without changing selected identity."
+      },
+      {
+        "name": "selectedId",
+        "type": "model<string | null>",
+        "description": "Two-way selection key."
+      },
+      {
+        "name": "selectionChange / itemActivated",
+        "type": "outputs",
+        "description": "Selection and activation events."
+      },
+      {
+        "name": "label / pageSize / loading",
+        "type": "inputs",
+        "description": "Accessible name, local page size, and pending state."
+      },
+      {
+        "name": "atlasListTemplate",
+        "type": "ng-template directive",
+        "description": "Optional typed item presentation. Context: $implicit AtlasListItem, selected boolean. Import AtlasListTemplate; use non-interactive content inside the option button."
+      }
+    ],
+    "example": "// Import AtlasListView.\nselected = signal<string | null>(null);\nitems = [{ id: 'desk', title: 'Studio desk' }];\n\n<atlas-list-view label=\"Inventory\" [items]=\"items\" [(selectedId)]=\"selected\" />",
+    "limits": [
+      "Local list/grid only; no virtualization or remote paging.",
+      "Item templates customize presentation, not selection behavior. Do not nest links, inputs, or buttons inside an option."
+    ]
+  },
+  {
+    "id": "table",
+    "title": "Data table",
+    "category": "Data table",
+    "status": "R&D preview",
+    "summary": "Inspect business records with search, column filters, ordered sorting, stable-key selection, configurable columns, row details, and local or server paging.",
+    "steps": [
+      "Click Amount to sort numerically. Click again to reverse.",
+      "Search across columns to narrow the results.",
+      "Checkboxes select records; the header checkbox selects only the current page.",
+      "Open Columns to hide fields. At least one data column must remain visible.",
+      "Change Rows per page to inspect pagination."
+    ],
+    "keyboard": [
+      "Tab moves through sorting buttons, checkboxes, row actions and page controls.",
+      "Enter activates a sort or row action; Space toggles checkboxes."
+    ],
+    "api": [
+      {
+        "name": "rows / columns / keyField",
+        "type": "T[] / AtlasColumn<T>[] / key",
+        "description": "Typed data, column descriptions and stable row identity."
+      },
+      {
+        "name": "filterable / selectable / columnToggle",
+        "type": "boolean",
+        "description": "Opt-in search, row selection and visibility chooser."
+      },
+      {
+        "name": "selectedKeys",
+        "type": "model<string[]>",
+        "description": "Selection persists across filtering/pages until the consumer clears it."
+      },
+      {
+        "name": "pageSize / loading",
+        "type": "number / boolean",
+        "description": "Local page size and loading state."
+      },
+      {
+        "name": "AtlasColumn",
+        "type": "key, label, format, sortValue, align, sortable",
+        "description": "Format display separately from sort values."
+      },
+      {
+        "name": "AtlasCell / atlasCellOf",
+        "type": "template directive",
+        "description": "Typed custom cell content; use with AtlasTable."
+      },
+      {
+        "name": "rowActivated",
+        "type": "output<T>",
+        "description": "Open-row action."
+      },
+      {
+        "name": "columnFilters / multiSort / columnManage",
+        "type": "boolean inputs",
+        "description": "Enable contains filters, sort priorities, and sizing/reorder/pin controls. Also enable columnToggle to show the column settings."
+      },
+      {
+        "name": "server / total / queryChange",
+        "type": "boolean / number / output<AtlasTableQuery>",
+        "description": "Server mode displays supplied page rows unchanged. The consumer supplies filtered total and handles initial/subsequent query requests."
+      },
+      {
+        "name": "atlasRowDetail / atlasRowDetailOf",
+        "type": "ng-template / readonly T[]",
+        "description": "Typed expandable detail template; let-row receives the record."
+      }
+    ],
+    "example": "// Imports: AtlasTable.\n<atlas-table [rows]=\"orders\" [columns]=\"columns\" keyField=\"id\"\n  [filterable]=\"true\" [selectable]=\"true\" [columnToggle]=\"true\"\n  [(selectedKeys)]=\"selected\" />",
+    "limits": [
+      "No virtualization or editable cells yet.",
+      "Wide tables scroll horizontally on phones. Column settings remain keyboard and touch usable. Advanced examples are in Collections.",
+      "Selections and expansion use unique stringified keys. Consumers must reconcile keys when records are permanently removed."
+    ]
+  },
+  {
+    "id": "multiselect",
+    "title": "Multi-select",
+    "category": "Selection & entry",
+    "status": "R&D preview",
+    "summary": "Choose multiple values while keeping selections visible as removable chips.",
+    "steps": [
+      "Open Approvers, then check up to two people. Unselected choices are disabled when the limit is reached.",
+      "Search filters the available choices without clearing existing selections.",
+      "Use a chip\u2019s remove button, Clear, or Reset request to remove selections. Changes commit immediately; Escape closes without undoing them."
+    ],
+    "keyboard": [
+      "Enter or Space opens the chooser. Tab moves through search, enabled checkboxes, Clear, and Done. Space toggles a checkbox.",
+      "Escape dismisses and returns focus. Tabbing beyond the popup exits it."
+    ],
+    "api": [
+      {
+        "name": "controlId / label",
+        "type": "string inputs",
+        "description": "Unique control ID and accessible label."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Disabled prevents interaction; readonly preserves focus while preventing edits."
+      },
+      {
+        "name": "formField",
+        "type": "Signal Forms directive",
+        "description": "Import FormField and bind a signal field. Alternatively use the model directly, but not both bindings on one instance."
+      },
+      {
+        "name": "options",
+        "type": "AtlasOption<string>[]",
+        "description": "Stable primitive values, labels, descriptions and disabled choices."
+      },
+      {
+        "name": "value",
+        "type": "model<string[]>",
+        "description": "Selected keys. Order follows selection; values are unique."
+      },
+      {
+        "name": "limit",
+        "type": "number, default 0",
+        "description": "Maximum selectable options; zero means unlimited. Lowering the limit does not discard existing values."
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Replaces results with loading feedback."
+      }
+    ],
+    "example": "// Import AtlasMultiSelect from @bqatlas/ui.\n// For [formField], import FormField from @angular/forms/signals.\n<atlas-multi-select controlId=\"approvers\" label=\"Approvers\"\n  [options]=\"people\" [limit]=\"2\" [formField]=\"fields.approvers\" />",
+    "limits": [
+      "Local data only; no remote search, virtualization or select-all action.",
+      "Disabled choices cannot be added; existing values can be removed.",
+      "Use a string-array signal field; CVA consumers keep their existing APIs and require an explicit adapter for this control."
+    ]
+  },
+  {
+    "id": "autocomplete",
+    "title": "Autocomplete",
+    "category": "Selection & entry",
+    "status": "R&D preview",
+    "summary": "Find one named record by typing, then commit its key from suggestions.",
+    "steps": [
+      "Type a name or description in Requester. Matching suggestions appear.",
+      "Choose an enabled result to store its ID. Unmatched text is never stored as a key.",
+      "Escape or leaving the popup preserves the previous selection. Clear removes it."
+    ],
+    "keyboard": [
+      "Arrow Down opens suggestions; Up/Down move through enabled options; Home/End jump to the first/last.",
+      "Enter selects, Escape cancels and returns focus, Tab leaves."
+    ],
+    "api": [
+      {
+        "name": "controlId / label",
+        "type": "string inputs",
+        "description": "Unique control ID and accessible label."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Disabled prevents interaction; readonly preserves focus while preventing edits."
+      },
+      {
+        "name": "formField",
+        "type": "Signal Forms directive",
+        "description": "Import FormField and bind a signal field. Alternatively use the model directly, but not both bindings on one instance."
+      },
+      {
+        "name": "options",
+        "type": "AtlasOption<string>[]",
+        "description": "Labels and descriptions are searchable; values identify selected records."
+      },
+      {
+        "name": "value",
+        "type": "model<string | null>",
+        "description": "Selected key or null; query text is separate."
+      },
+      {
+        "name": "loading",
+        "type": "boolean",
+        "description": "Pending suggestions cannot be committed."
+      }
+    ],
+    "example": "// Import AtlasAutocomplete from @bqatlas/ui.\n// For [formField], import FormField from @angular/forms/signals.\n<atlas-autocomplete controlId=\"requester\" label=\"Requester\"\n  [options]=\"people\" [formField]=\"fields.requester\" />",
+    "limits": [
+      "Selection-only autocomplete: no arbitrary free-text values, async provider or debounce adapter yet.",
+      "Suggestions use a local filtered list. Multi-column record selection remains AtlasLookup."
+    ]
+  },
+  {
+    "id": "choicegroups",
+    "title": "Checkbox and radio groups",
+    "category": "Selection & entry",
+    "status": "R&D preview",
+    "summary": "Present a short set of choices directly on a form without a dropdown.",
+    "steps": [
+      "Checkboxes permit several services; radio buttons choose one priority.",
+      "Disabled choices stay visible. Read-only blocks changes while keeping controls available for focus."
+    ],
+    "keyboard": [
+      "Checkboxes use Tab and Space.",
+      "Radio buttons use native browser arrow-key navigation within the group."
+    ],
+    "api": [
+      {
+        "name": "controlId / label",
+        "type": "string inputs",
+        "description": "Unique control ID and accessible label."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Disabled prevents interaction; readonly preserves focus while preventing edits."
+      },
+      {
+        "name": "formField",
+        "type": "Signal Forms directive",
+        "description": "Import FormField and bind a signal field. Alternatively use the model directly, but not both bindings on one instance."
+      },
+      {
+        "name": "AtlasCheckboxGroup.value",
+        "type": "model<string[]>",
+        "description": "Selected keys; optional limit enforces a maximum."
+      },
+      {
+        "name": "AtlasRadioGroup.value",
+        "type": "model<string | null>",
+        "description": "One selected key."
+      },
+      {
+        "name": "options",
+        "type": "AtlasOption<string>[]",
+        "description": "Labels, descriptions and disabled choices."
+      }
+    ],
+    "example": "// Import AtlasCheckboxGroup, AtlasRadioGroup from @bqatlas/ui.\n// For [formField], import FormField from @angular/forms/signals.\n<atlas-checkbox-group controlId=\"services\" label=\"Services\"\n  [options]=\"services\" [formField]=\"fields.services\" />\n<atlas-radio-group controlId=\"priority\" label=\"Priority\"\n  [options]=\"priorities\" [formField]=\"fields.priority\" />",
+    "limits": [
+      "No indeterminate checkbox or hierarchical selection.",
+      "Provide a unique controlId for each radio group so unrelated groups do not share a browser radio name."
+    ]
+  },
+  {
+    "id": "dates",
+    "title": "Date and date range",
+    "category": "Selection & entry",
+    "status": "R&D preview",
+    "summary": "Enter business calendar dates without converting them through a timezone.",
+    "steps": [
+      "Use Required by for a single calendar date. Use From/To for a delivery window.",
+      "A partially completed range is invalid. End must be on or after start.",
+      "Reset clears the sample dates. Your operating system supplies the calendar picker and local date presentation."
+    ],
+    "keyboard": [
+      "Native date-field keyboard behavior depends on browser and operating system. Tab navigates date segments and controls."
+    ],
+    "api": [
+      {
+        "name": "controlId / label",
+        "type": "string inputs",
+        "description": "Unique control ID and accessible label."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Disabled prevents interaction; readonly preserves focus while preventing edits."
+      },
+      {
+        "name": "formField",
+        "type": "Signal Forms directive",
+        "description": "Import FormField and bind a signal field. Alternatively use the model directly, but not both bindings on one instance."
+      },
+      {
+        "name": "AtlasDateInput.value",
+        "type": "model<string>",
+        "description": "YYYY-MM-DD or empty string. No Date object or UTC conversion."
+      },
+      {
+        "name": "AtlasDateRangeInput.value",
+        "type": "model<AtlasDateRange>",
+        "description": "Object with start and end date-only strings."
+      },
+      {
+        "name": "minDate / maxDate",
+        "type": "YYYY-MM-DD strings",
+        "description": "Native picker bounds. Apply matching schema rules for form validity."
+      },
+      {
+        "name": "dateRangeError",
+        "type": "pure function",
+        "description": "Validates completeness, calendar validity, ordering and optional bounds."
+      }
+    ],
+    "example": "// Import AtlasDateInput, AtlasDateRangeInput, dateRangeError from @bqatlas/ui.\n// For [formField], import FormField from @angular/forms/signals.\n// Signal Forms schema: validate(s.period, ctx => {\n//   const message = dateRangeError(ctx.value());\n//   return message ? { kind: 'range', message } : null;\n// });\n<atlas-date-input controlId=\"required\" label=\"Required by\" [formField]=\"fields.requiredBy\" />\n<atlas-date-range controlId=\"period\" label=\"Delivery window\" [formField]=\"fields.period\" />",
+    "limits": [
+      "Native date UI, not a custom calendar. Time, timezone/instant fields, week numbers, business-day rules and presets are later work.",
+      "An entirely empty range is optional by default. Add a required-range schema rule if your workflow needs both dates."
+    ]
+  },
+  {
+    "id": "decimal",
+    "title": "Decimal and currency entry",
+    "category": "Selection & entry",
+    "status": "R&D preview",
+    "summary": "Display numbers in a chosen locale while retaining numeric values in the signal model.",
+    "steps": [
+      "Enter a budget or weight. Switch between en-US and de-DE to inspect separators.",
+      "The currency label is display-only; it does not change the numeric model.",
+      "Invalid text stays visible for correction and does not overwrite the last valid numeric value. The form must treat parse errors as blocking errors."
+    ],
+    "keyboard": [
+      "Use normal text editing. Focus removes grouping for editing; blur restores locale grouping."
+    ],
+    "api": [
+      {
+        "name": "controlId / label",
+        "type": "string inputs",
+        "description": "Unique control ID and accessible label."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean inputs",
+        "description": "Disabled prevents interaction; readonly preserves focus while preventing edits."
+      },
+      {
+        "name": "formField",
+        "type": "Signal Forms directive",
+        "description": "Import FormField and bind a signal field. Alternatively use the model directly, but not both bindings on one instance."
+      },
+      {
+        "name": "value",
+        "type": "model<number | null>",
+        "description": "Numeric value; empty input produces null."
+      },
+      {
+        "name": "locale",
+        "type": "string, default en-US",
+        "description": "Intl locale controlling decimal/group separators."
+      },
+      {
+        "name": "currency",
+        "type": "string, default empty",
+        "description": "Visible currency code, e.g. EUR; no conversion is performed."
+      },
+      {
+        "name": "fractionDigits",
+        "type": "number, default 2",
+        "description": "Minimum displayed fraction digits; up to 10 digits retained for display."
+      },
+      {
+        "name": "parseErrorChange",
+        "type": "output<boolean>",
+        "description": "Connect to application validation; parsing errors must block saving."
+      },
+      {
+        "name": "parseLocaleNumber",
+        "type": "function",
+        "description": "Returns number, null for empty, undefined for invalid text."
+      }
+    ],
+    "example": "// Import AtlasDecimalInput from @bqatlas/ui.\n// For [formField], import FormField from @angular/forms/signals.\n<atlas-decimal-input controlId=\"budget\" label=\"Budget\" currency=\"EUR\"\n  locale=\"de-DE\" [formField]=\"fields.budget\"\n  (parseErrorChange)=\"badBudget.set($event)\" />",
+    "limits": [
+      "Initial parser supports ASCII digits and Western groups of three, verified for en-US/de-DE. Indian grouping, non-Latin numerals and accounting parentheses are unsupported.",
+      "JavaScript numbers are not a financial decimal-arithmetic engine. Precision/rounding policy belongs to the application.",
+      "Switching locale or resetting discards invalid draft text and formats the last committed numeric value.",
+      "Currency codes are not parsed inside the text field."
+    ]
+  },
+  {
+    "id": "validation",
+    "title": "Validation summary",
+    "category": "Selection & entry",
+    "status": "R&D preview",
+    "summary": "Collect errors into actionable links that take the user to the field needing attention.",
+    "steps": [
+      "Click Validate request to mark fields touched and show the summary.",
+      "Click an error to focus its field; correct it and the summary updates.",
+      "Disabled/read-only requests are not submitted or validated as editable requests."
+    ],
+    "keyboard": [
+      "Tab moves through error links; Enter focuses the associated field."
+    ],
+    "api": [
+      {
+        "name": "issues",
+        "type": "AtlasValidationIssue[]",
+        "description": "Unique field IDs and readable messages."
+      },
+      {
+        "name": "fieldRequested",
+        "type": "output<string>",
+        "description": "Consumer focuses the corresponding control in its own scope."
+      }
+    ],
+    "example": "// Import AtlasValidationSummary from @bqatlas/ui.\n// For [formField], import FormField from @angular/forms/signals.\n<atlas-validation-summary [issues]=\"issues()\"\n  (fieldRequested)=\"focusField($event)\" />",
+    "limits": [
+      "Application supplies errors; the component does not inspect forms or query the document.",
+      "Include both form schema errors and control parsing errors before saving."
+    ]
+  },
+  {
+    "id": "advanced-table",
+    "title": "Advanced table and server paging",
+    "category": "Collections",
+    "status": "R&D preview",
+    "summary": "An inventory table with independent column filters, sort priorities, column configuration, details, and a replaceable data provider.",
+    "steps": [
+      "Type in a column filter to match displayed text. Global search matches every word across columns. Both filters combine with AND; filtering resets to the first page.",
+      "Click a heading to sort ascending, then descending. Enable Add sort levels or Shift-click to append another priority. Clear sort restores source ordering.",
+      "Open Columns to show/hide, move left/right, pin to the left, or enter a width from 100\u2013600 px. Drag the header edge to resize. At least one column stays visible. Pinned columns appear first, in their configured order.",
+      "Use + to expand row details. Selecting checkboxes stores IDs independently of the current page. Select all affects only the current page.",
+      "Switch to server paging to test delayed results. Simulate request failure, then Retry. Searching again cancels the previous request.",
+      "On narrow windows, scroll the table horizontally. Use the same settings and filters; row details wrap."
+    ],
+    "keyboard": [
+      "Tab reaches search, sort mode, column settings, headers, filters, row actions, and paging.",
+      "Enter/Space activates sort and detail buttons. Shift-click adds sort priorities; the Add sort levels checkbox provides a touch/keyboard alternative.",
+      "Column widths can be edited with the number field and arrow keys; move and pin actions use ordinary buttons."
+    ],
+    "api": [
+      {
+        "name": "columns",
+        "type": "AtlasColumn<T>[]",
+        "description": "Adds width (px) and filterable flags to existing columns. format controls filter text; sortValue controls local sorting."
+      },
+      {
+        "name": "columnFilters / multiSort / columnManage / columnToggle",
+        "type": "boolean",
+        "description": "Opt-in features. columnManage exposes sizing, pinning and ordering inside the columnToggle menu."
+      },
+      {
+        "name": "selectedKeys",
+        "type": "model<string[]>",
+        "description": "Stable stringified keys across filters/pages. Must be globally unique; selection does not mean editing."
+      },
+      {
+        "name": "atlasRowDetailOf",
+        "type": "readonly T[]",
+        "description": "Type inference for the atlasRowDetail template context, $implicit: T."
+      },
+      {
+        "name": "server / total / loading / error / retry",
+        "type": "inputs and output<void>",
+        "description": "Supply one page, filtered count, pending state and error. Retry emits to the consumer; server mode does not re-filter, re-sort or slice rows."
+      },
+      {
+        "name": "queryChange",
+        "type": "output<AtlasTableQuery>",
+        "description": "Emits initially and on page, pageSize, search, filters or sort changes. page is zero based; filters are case-insensitive contains text; sort is an ordered array of key/direction."
+      },
+      {
+        "name": "AtlasLatestRequest.run / cancel",
+        "type": "adapter helper",
+        "description": "run(request, accept, reject) aborts previous work and ignores stale completion/error even if the provider ignores abort. cancel on consumer destruction."
+      }
+    ],
+    "example": "// Imports: AtlasTable, AtlasRowDetail; type AtlasTableQuery.\n<atlas-table [rows]=\"records\" [columns]=\"columns\" keyField=\"id\"\n  [filterable]=\"true\" [columnFilters]=\"true\" [multiSort]=\"true\"\n  [columnToggle]=\"true\" [columnManage]=\"true\"\n  [server]=\"true\" [total]=\"total\" [loading]=\"loading\" [error]=\"error\"\n  (queryChange)=\"load($event)\" (retry)=\"retry()\">\n  <ng-template atlasRowDetail [atlasRowDetailOf]=\"records\" let-row>{{row.id}}</ng-template>\n</atlas-table>",
+    "limits": [
+      "Filters are contains-text only; numeric ranges and operator menus are deferred.",
+      "Column settings are per mounted component, not persisted layouts. Pinning is left-only; reorder uses buttons, not drag-and-drop.",
+      "No virtualization, editing, grouping, or aggregate footer yet. Mobile presentation is horizontal scrolling.",
+      "The provider must apply matching search/filter/sort semantics before paging and return the filtered total. The sample is a delayed in-memory adapter, not HTTP.",
+      "Server collation, authorization, validation and query allowlists are the backend responsibility. Do not bind raw arbitrary field names into database queries."
+    ]
+  },
+  {
+    "id": "tree",
+    "title": "Tree navigation",
+    "category": "Collections",
+    "status": "R&D preview",
+    "summary": "Browse a hierarchy while keeping expansion, keyboard focus, and selected node ID separate.",
+    "steps": [
+      "Expand a branch with its disclosure or Right arrow. Select an enabled node with Enter or a row click.",
+      "Search labels/descriptions to reveal matching nodes and their ancestors. Clearing search restores saved expansion.",
+      "Disabled nodes remain navigable so their children can be inspected; they cannot be selected. leafOnly can restrict selection to leaves.",
+      "Compact desktop rows are approximately 24 px tall with 14 px indentation per level. Descriptions sit beside labels and wrap when needed. Comfortable/mobile rows retain 42 px minimum targets."
+    ],
+    "keyboard": [
+      "Up/Down, Home/End move focus without selecting.",
+      "Right expands or enters a branch. Left collapses or moves to its parent. Enter/Space selects.",
+      "Search temporarily expands matches. During search Left moves to the parent; collapsing search results is disabled."
+    ],
+    "api": [
+      {
+        "name": "nodes",
+        "type": "readonly AtlasTreeNode[]",
+        "description": "Unique string id, label, optional description, disabled, children. IDs must be globally unique; provide an acyclic tree."
+      },
+      {
+        "name": "selectedId / expandedIds",
+        "type": "model<string|null> / model<string[]>",
+        "description": "Consumer-controlled committed selection and expanded branches."
+      },
+      {
+        "name": "nodeSelected",
+        "type": "output<AtlasTreeNode>",
+        "description": "Emits only an enabled committed node; focus movement does not commit."
+      },
+      {
+        "name": "label / filterable / leafOnly",
+        "type": "string / boolean / boolean",
+        "description": "Accessible tree label, local search, and optional leaf selection restriction."
+      },
+      {
+        "name": "disabled / readonly",
+        "type": "boolean",
+        "description": "Disabled blocks selection/expansion. Readonly allows browsing but blocks selection."
+      },
+      {
+        "name": "loading / error / retry",
+        "type": "boolean / string / output<void>",
+        "description": "Consumer-owned loading and error presentation with retry."
+      },
+      {
+        "name": "--atlas-tree-row-height / --atlas-tree-indent",
+        "type": "CSS custom properties",
+        "description": "Density-aware minimum row height and indentation. Compact defaults: 24 px / 14 px; comfortable: 42 px / 20 px."
+      }
+    ],
+    "example": "// Import AtlasTree; type AtlasTreeNode.\nnodes: AtlasTreeNode[] = [{id: \"region\", label: \"Region\", children: [{id: \"bay\", label: \"Receiving bay\"}]}];\nselected = signal<string | null>(null);\n<atlas-tree [nodes]=\"nodes\" label=\"Locations\" [(selectedId)]=\"selected\" />",
+    "limits": [
+      "Local, single-selection tree only. No lazy loading of individual branches, drag-and-drop, check propagation, or virtualization.",
+      "Disabled nodes are focusable for structural navigation. Broad screen-reader and device qualification is still pending."
+    ]
+  },
+  {
+    "id": "tree-select",
+    "title": "Tree select with Signal Forms",
+    "category": "Collections",
+    "status": "R&D preview",
+    "summary": "Choose a leaf from a hierarchy while storing its ID in a form. The expandable inline panel fits within application windows.",
+    "steps": [
+      "Open the field, search or expand branches, then select an enabled leaf. The field displays the label while its value stores the ID.",
+      "Clear selection sets null. Done or Escape closes without changing the value and restores trigger focus.",
+      "Bind with native Signal Forms or a direct value model. Keep the selected record available in nodes so its label can be resolved."
+    ],
+    "keyboard": [
+      "Tab focuses the trigger; Enter/Space opens the inline panel. Tab moves into search and then the tree.",
+      "Use the tree arrow keys to navigate, Enter/Space to commit. Escape inside the panel closes it."
+    ],
+    "api": [
+      {
+        "name": "nodes / leafOnly",
+        "type": "AtlasTreeNode[] / boolean",
+        "description": "Tree source and selection policy; leafOnly defaults true."
+      },
+      {
+        "name": "value",
+        "type": "model<string|null>",
+        "description": "Committed ID; null means no selection. Use [(value)] or [formField], not both."
+      },
+      {
+        "name": "label / controlId / describedBy",
+        "type": "string inputs",
+        "description": "Accessible trigger name, external label ID and help/error association."
+      },
+      {
+        "name": "disabled / readonly / invalid / touched",
+        "type": "Signal Forms state inputs",
+        "description": "Disabled blocks trigger focus; readonly permits browsing but prevents edits. touchedChange reports interaction."
+      },
+      {
+        "name": "loading / error / retry",
+        "type": "boolean / string / output<void>",
+        "description": "Passed to the tree panel."
+      },
+      {
+        "name": "focus()",
+        "type": "method",
+        "description": "Focuses the trigger."
+      }
+    ],
+    "example": "// Imports: AtlasTreeSelect, FormField; form/required from @angular/forms/signals.\ndraft = signal<{location: string | null}>({location: null});\nfields = form(this.draft, schema => required(schema.location));\n<atlas-tree-select [nodes]=\"locations\" label=\"Receiving location\" [formField]=\"fields.location\" />",
+    "limits": [
+      "Inline disclosure panel, not a floating combobox popup. Opening it moves content below; this is intentional for constrained ERP windows.",
+      "No CVA adapter, multiple selection, cascading checkbox behavior, or remote label resolution yet."
+    ]
+  },
+  {
+    "id": "density",
+    "title": "Compact and comfortable density",
+    "category": "Foundations",
+    "status": "R&D preview",
+    "summary": "Compact desktop spacing puts more ERP records and fields in view. Comfortable spacing provides larger targets; mobile workspaces use it automatically.",
+    "steps": [
+      "Desktop controls default to compact: 28 px inputs/buttons, reduced panel padding and table cell spacing, and a 32 px window title bar. Text remains readable at its existing size.",
+      "Use the Compact / Comfortable toggle in the showcase to switch density. This affects panels, forms, lists and tables, not only input heights.",
+      "For a consumer, set data-density=\"comfortable\" on a containing element to opt into larger controls. Mobile workspace presentation applies comfortable tokens locally."
+    ],
+    "keyboard": [
+      "The density toggle is an ordinary button: Tab to focus, Enter or Space to switch.",
+      "Density changes do not alter keyboard navigation or selection state."
+    ],
+    "api": [
+      {
+        "name": "data-density=\"comfortable\"",
+        "type": "ancestor HTML attribute",
+        "description": "Overrides inherited density tokens with 42 px controls and more generous spacing."
+      },
+      {
+        "name": "--atlas-control-height / --atlas-space",
+        "type": "CSS custom properties",
+        "description": "Control height and general layout spacing. Default 28 px / 8 px; comfortable 42 px / 16 px."
+      },
+      {
+        "name": "--atlas-panel-padding / --atlas-cell-padding / --atlas-toolbar-padding",
+        "type": "CSS custom properties",
+        "description": "Panel content, table cells and collection toolbar spacing."
+      }
+    ],
+    "example": "<!-- Compact is the default. Import @bqatlas/ui/theme.css once. -->\n<section data-density=\"comfortable\">\n  <atlas-table [rows]=\"orders\" [columns]=\"columns\" keyField=\"id\" />\n</section>",
+    "limits": [
+      "Density is inherited presentation state, not a per-control input. Custom cell/item content may require its own responsive styling.",
+      "Mobile workspace spacing is automatic; standalone applications choose a density appropriate to their input devices."
+    ]
+  },
+  {
+    "id": "editable-grid",
+    "title": "Editable grid",
+    "category": "ERP editing",
+    "status": "R&D preview",
+    "summary": "Edit one record at a time with a separate row draft. Applying a row changes the order draft; saving the order remains the application\u2019s responsibility.",
+    "steps": [
+      "Choose Edit to copy a row into the editor. The first editable field receives focus. Other rows remain protected until Apply or Cancel.",
+      "Required values, finite numbers, bounds and numeric step rules are checked before applying. Correct the field errors and retry.",
+      "Apply row updates rows by stable key. Cancel row discards the temporary edit. Both return focus to the row action.",
+      "In the purchase-order example, Save order also validates/applies a pending row before saving. A failed save leaves the order draft available for retry.",
+      "Remove emits a request. The example confirms before removing a line. On mobile workspaces lines become labelled cards."
+    ],
+    "keyboard": [
+      "Tab/Shift+Tab move between native fields and row actions.",
+      "Ctrl/Cmd+Enter applies the row. Escape cancels the row without closing its workspace window.",
+      "Use normal keyboard interaction for number and select fields."
+    ],
+    "api": [
+      {
+        "name": "rows",
+        "type": "model<T[]>",
+        "description": "Order-draft rows. Apply replaces the matching row immutably; it does not call an API."
+      },
+      {
+        "name": "draft",
+        "type": "model<T|null>",
+        "description": "Temporary row edit. Bind to parent-owned signal state to preserve edits when views unmount."
+      },
+      {
+        "name": "columns",
+        "type": "AtlasEditColumn<T>[]",
+        "description": "key, label, text/number/select type, readonly, required, min/max/step, options and format."
+      },
+      {
+        "name": "keyField",
+        "type": "keyof T & string",
+        "description": "Unique stable identity. Treat the key column as readonly. Source records must be structured-cloneable."
+      },
+      {
+        "name": "disabled / removable",
+        "type": "boolean",
+        "description": "Locks mutations, or enables Remove actions."
+      },
+      {
+        "name": "rowApplied / removeRequested",
+        "type": "output<T>",
+        "description": "Reports applied rows and requested removals."
+      },
+      {
+        "name": "validateEditRow / replaceEditedRow",
+        "type": "pure helpers",
+        "description": "Validate draft values and safely replace an existing record without mutating original data."
+      }
+    ],
+    "example": "// Imports: AtlasEditableGrid; type AtlasEditColumn.\nlines = signal([{id: \"L-1\", quantity: 1}]);\nrowDraft = signal<{id: string; quantity: number} | null>(null);\ncolumns: AtlasEditColumn<{id: string; quantity: number}>[] = [{key: \"quantity\", label: \"Quantity\", type: \"number\", required: true, min: 1, step: 1}];\n<atlas-editable-grid [columns]=\"columns\" keyField=\"id\" [(rows)]=\"lines\" [(draft)]=\"rowDraft\" />",
+    "limits": [
+      "One row editor at a time with native text, number and select fields. This is not a spreadsheet: range selection, paste, cell-arrow navigation, custom editor templates and virtualization remain future work.",
+      "Validation is synchronous. Server validation, authorization and concurrency/version checks belong to the persistence adapter.",
+      "Native number inputs and JavaScript numbers are used; this is not an exact monetary arithmetic engine.",
+      "Consumer-owned row keys must remain unique and immutable. Keep pending draft rows in the source until Apply or Cancel."
+    ]
+  },
+  {
+    "id": "master-detail",
+    "title": "Master/detail layout",
+    "category": "ERP editing",
+    "status": "R&D preview",
+    "summary": "Keep a record list and editor together on desktop; switch between preserved regions when the component becomes narrow.",
+    "steps": [
+      "Project the record list with atlasMaster and the editor with atlasDetail.",
+      "Set detailOpen true after choosing a record. Below the component breakpoint, the list gives way to the editor.",
+      "Use Back to return to the list. Both regions remain mounted, so local form state survives presentation changes.",
+      "The purchase-order example asks before discarding unsaved changes when another record is chosen. Its state is owned by the gallery, so category changes retain drafts."
+    ],
+    "keyboard": [
+      "Record buttons use Tab and Enter.",
+      "Back restores focus to the originating record when available."
+    ],
+    "api": [
+      {
+        "name": "detailOpen",
+        "type": "model<boolean>",
+        "description": "Which region is visible in narrow mode. Desktop shows both."
+      },
+      {
+        "name": "masterLabel / detailLabel",
+        "type": "string",
+        "description": "Accessible names and Back label."
+      },
+      {
+        "name": "breakpoint",
+        "type": "number",
+        "description": "Component width breakpoint in CSS pixels, default 680. ResizeObserver watches the host."
+      },
+      {
+        "name": "atlasMaster / atlasDetail",
+        "type": "projection attributes",
+        "description": "Content slots; regions stay mounted while hidden."
+      }
+    ],
+    "example": "// Import AtlasMasterDetail.\n<atlas-master-detail [(detailOpen)]=\"opened\" masterLabel=\"Orders\">\n  <div atlasMaster><!-- Record selection --></div>\n  <div atlasDetail><!-- Editor --></div>\n</atlas-master-detail>",
+    "limits": [
+      "Layout only: record loading, dirty guards and routing are owned by the consumer.",
+      "No draggable divider or persisted pane sizing yet. Narrow mode follows component width, not only browser width."
+    ]
+  },
+  {
+    "id": "command-toolbar",
+    "title": "Command toolbar",
+    "category": "ERP editing",
+    "status": "R&D preview",
+    "summary": "Compact grouped actions with explicit disabled state and keyboard navigation.",
+    "steps": [
+      "Supply action IDs, labels, optional icons, primary styling and group names.",
+      "Handle command IDs in the consumer. The purchase-order example provides Save, Discard and Add line.",
+      "Actions wrap on narrow screens. Project a short status message for saved, dirty or saving state."
+    ],
+    "keyboard": [
+      "Tab enters at the current enabled command. Left/Right wrap through enabled commands; Home/End jump to the first/last.",
+      "Enter or Space executes the focused action. Disabled actions are skipped."
+    ],
+    "api": [
+      {
+        "name": "commands",
+        "type": "AtlasCommand[]",
+        "description": "Unique id, label, optional icon, primary, disabled and group."
+      },
+      {
+        "name": "command",
+        "type": "output<string>",
+        "description": "ID of the activated enabled action."
+      },
+      {
+        "name": "label / disabled",
+        "type": "string / boolean",
+        "description": "Accessible toolbar name and global action lock."
+      }
+    ],
+    "example": "// Import AtlasCommandToolbar.\n<atlas-command-toolbar [commands]=\"actions\" (command)=\"run($event)\" [disabled]=\"saving()\">{{status()}}</atlas-command-toolbar>",
+    "limits": [
+      "Uses wrapped visible actions. Overflow menus, split buttons and configurable shortcut registration are not included yet.",
+      "Consumers enforce permissions and action semantics; hiding or disabling an action is not backend authorization."
+    ]
+  },
+  {
+    "id": "dialog",
+    "title": "Dialogs and confirmation",
+    "category": "ERP editing",
+    "status": "R&D preview",
+    "summary": "Native modal dialogs for adding lines and confirming discard/removal, with browser focus containment.",
+    "steps": [
+      "Bind open and supply a title. Project body content and an atlasDialogActions footer.",
+      "Validate before closing. The purchase-order Add line dialog stays open when values are invalid.",
+      "Cancel, Close or Escape dismisses. Set busy to prevent user dismissal during a pending operation.",
+      "Inside the playground, the dialog is sized to its owning window. The browser modal backdrop blocks the rest of the page while it is open."
+    ],
+    "keyboard": [
+      "Tab and Shift+Tab remain within the native modal dialog.",
+      "Escape dismisses unless busy. Native dialog closure restores focus to the opener when it remains available."
+    ],
+    "api": [
+      {
+        "name": "open",
+        "type": "model<boolean>",
+        "description": "Show/close the native modal dialog."
+      },
+      {
+        "name": "title / busy",
+        "type": "string / boolean",
+        "description": "Required accessible title; busy prevents Close and Escape dismissal."
+      },
+      {
+        "name": "dismissed",
+        "type": "output<void>",
+        "description": "User dismiss action. Programmatically setting open false does not emit it."
+      },
+      {
+        "name": "atlasDialogActions",
+        "type": "projection attribute",
+        "description": "Footer controls supplied by the consumer."
+      }
+    ],
+    "example": "// Import AtlasDialog, AtlasButton.\n<atlas-dialog title=\"Discard changes?\" [(open)]=\"confirmOpen\">\n  <p>Your unsaved edits will be lost.</p>\n  <div atlasDialogActions><button atlasButton (click)=\"confirmOpen.set(false)\">Keep editing</button></div>\n</atlas-dialog>",
+    "limits": [
+      "Native page-modal behavior: this is not an independent modal stack for every desktop window. Do not open multiple application dialogs at once.",
+      "Drawer presentation and asynchronous dialog services are deferred."
+    ]
+  },
+  {
+    "id": "record-navigator",
+    "title": "Record navigator",
+    "category": "Quotes datasheet",
+    "status": "R&D preview",
+    "summary": "Move between quotes with first/previous/next/last, an ID selector, and New record. Dirty drafts offer Keep editing, Discard and continue, or Save and continue.",
+    "steps": [
+      "Move between quotes with first/previous/next/last, an ID selector, and New record. Dirty drafts offer Keep editing, Discard and continue, or Save and continue.",
+      "See projects/playground/src/app/quote-examples.ts and quote-demo.ts for the complete signal-backed integration."
+    ],
+    "keyboard": [
+      "Use Tab to reach each action and Enter or Space to activate it. Native select navigation applies to the record selector."
+    ],
+    "api": [
+      {
+        "name": "records / currentId / disabled",
+        "type": "AtlasRecordOption[] / string / boolean",
+        "description": "Controlled record list with stable id and label. Disable while saving."
+      },
+      {
+        "name": "navigate / create",
+        "type": "output<string> / output<void>",
+        "description": "Requests only. The owner guards unsaved state, saves or discards, then updates currentId. The navigator never changes domain data."
+      }
+    ],
+    "example": "<atlas-record-navigator [records]=\"options()\" [currentId]=\"draft().id\" [disabled]=\"saving()\" (navigate)=\"requestRecord($event)\" (create)=\"requestRecord('new')\" />",
+    "limits": [
+      "Local record list; Find record is a native ID selector with browser type-ahead, not remote search.",
+      "The consumer owns dirty prompts, record creation, persistence, and focus after navigation. New quote cancellation returns to the first saved record."
+    ]
+  },
+  {
+    "id": "dependent-lookups",
+    "title": "Dependent lookups",
+    "category": "Quotes datasheet",
+    "status": "R&D preview",
+    "summary": "Customer and delivery address demonstrate a dependent selection. Changing customer clears the address and limits its choices to that customer.",
+    "steps": [
+      "Customer and delivery address demonstrate a dependent selection. Changing customer clears the address and limits its choices to that customer.",
+      "See projects/playground/src/app/quote-examples.ts and quote-demo.ts for the complete signal-backed integration."
+    ],
+    "keyboard": [
+      "Use Tab to reach each action and Enter or Space to activate it. Native select navigation applies to the record selector."
+    ],
+    "api": [
+      {
+        "name": "dependentRecords",
+        "type": "(rows, parent, parentKey) => T[]",
+        "description": "Pure local filtering helper exported from @bqatlas/ui. Null parent yields no records; it never clears a model automatically."
+      }
+    ],
+    "example": "readonly addresses = computed(() => dependentRecords(allAddresses, customerId(), row => row.customerId));\n// In your customer change handler, clear addressId when the parent changes.\n// Bind addresses() to AtlasLookup.rows; validate the saved address belongs to the selected customer.",
+    "limits": [
+      "Local data only; remote loading, cancellation and backend constraints remain consumer responsibilities."
+    ]
+  },
+  {
+    "id": "validation-navigator",
+    "title": "Validation navigator",
+    "category": "Quotes datasheet",
+    "status": "R&D preview",
+    "summary": "After an invalid save, activate an error to focus its header field or the exact datasheet cell. Resolved errors disappear as the draft changes.",
+    "steps": [
+      "After an invalid save, activate an error to focus its header field or the exact datasheet cell. Resolved errors disappear as the draft changes.",
+      "See projects/playground/src/app/quote-examples.ts and quote-demo.ts for the complete signal-backed integration."
+    ],
+    "keyboard": [
+      "Use Tab to reach each action and Enter or Space to activate it. Native select navigation applies to the record selector."
+    ],
+    "api": [
+      {
+        "name": "errors",
+        "type": "AtlasValidationTarget[]",
+        "description": "Unique stable target IDs and human-readable messages supplied by the consumer."
+      },
+      {
+        "name": "activate",
+        "type": "output<AtlasValidationTarget>",
+        "description": "Consumer reveals a hidden tab if necessary, waits for rendering, then focuses and scrolls the target. No global DOM lookup is performed by this control."
+      }
+    ],
+    "example": "<atlas-validation-navigator [errors]=\"errors()\" (activate)=\"focusError($event)\" />",
+    "limits": [
+      "Validation rules and target resolution belong to the feature. The Quotes demo has one visible form; hidden-tab activation is a consumer integration hook, not automatically implemented."
+    ]
+  },
+  {
+    "id": "property-sheet",
+    "title": "Property sheet",
+    "category": "Business panels",
+    "status": "R&D preview",
+    "summary": "Compact grouped label/value editing for record properties. The demo includes text, numbers, a choice field, checkbox and a read-only code.",
+    "steps": [
+      "Edit account properties directly. Adjust Discount, Tax and Shipping to update the totals panel.",
+      "Reset properties restores the sample values. Numeric range errors in the demo suppress the totals until corrected."
+    ],
+    "keyboard": [
+      "Tab follows the native control order. Enter/Space activates buttons and checkboxes; native select and text-editing keys apply."
+    ],
+    "api": [
+      {
+        "name": "fields",
+        "type": "AtlasProperty[]",
+        "description": "Unique key, label, group, type, optional readonly, min/max/step, options and hint."
+      },
+      {
+        "name": "value / valueChange",
+        "type": "Record<string, AtlasPropertyValue>",
+        "description": "Immutable two-way model; blank numeric input produces null. Consumer validates and persists."
+      },
+      {
+        "name": "disabled",
+        "type": "boolean",
+        "description": "Disables editors; read-only values remain displayed."
+      }
+    ],
+    "example": "<atlas-property-sheet [fields]=\"fields\" [(value)]=\"draft\" />",
+    "limits": [
+      "Native input constraints do not replace consumer validation. No Signal Forms/CVA adapter or custom editor projection in this first version."
+    ]
+  },
+  {
+    "id": "totals-panel",
+    "title": "Totals and adjustments",
+    "category": "Business panels",
+    "status": "R&D preview",
+    "summary": "Display labeled currency amounts with an emphasized total. The application computes discount, tax, shipping and rounding.",
+    "steps": [
+      "Change the property-sheet adjustments to see recalculated amounts.",
+      "Demo calculation: discount first, tax on discounted subtotal, then shipping."
+    ],
+    "keyboard": [
+      "Tab follows the native control order. Enter/Space activates buttons and checkboxes; native select and text-editing keys apply."
+    ],
+    "api": [
+      {
+        "name": "lines",
+        "type": "AtlasTotalLine[]",
+        "description": "Stable id, label, numeric value, optional emphasis."
+      },
+      {
+        "name": "currency / locale",
+        "type": "string",
+        "description": "Intl.NumberFormat configuration; defaults USD and en-US."
+      }
+    ],
+    "example": "<atlas-totals-panel [lines]=\"totals()\" currency=\"USD\" />",
+    "limits": [
+      "Display-only; tax rules, currency conversion and financial decimal arithmetic are not implemented by the component."
+    ]
+  },
+  {
+    "id": "activity-timeline",
+    "title": "Activity timeline",
+    "category": "Business panels",
+    "status": "R&D preview",
+    "summary": "A compact chronological list of notes, calls and status events.",
+    "steps": [
+      "Add an internal note to prepend it to the local timeline.",
+      "Events retain their supplied order and render actor, kind and timestamp."
+    ],
+    "keyboard": [
+      "Tab follows the native control order. Enter/Space activates buttons and checkboxes; native select and text-editing keys apply."
+    ],
+    "api": [
+      {
+        "name": "events",
+        "type": "AtlasActivity[]",
+        "description": "Stable id, title, detail, actor, ISO timestamp and kind."
+      },
+      {
+        "name": "label",
+        "type": "string",
+        "description": "Accessible list label."
+      }
+    ],
+    "example": "<atlas-activity-timeline [events]=\"activity()\" />",
+    "limits": [
+      "Consumers own ordering, paging and persistence. Timestamps use the viewer locale; no audit guarantees or rich-text rendering."
+    ]
+  },
+  {
+    "id": "attachment-list",
+    "title": "Document attachments",
+    "category": "Business panels",
+    "status": "R&D preview",
+    "summary": "Choose files, show upload progress, retry failed uploads, preview ready files and remove or cancel items.",
+    "steps": [
+      "Add a sample or choose local files up to 2 MB. No data is sent to a server.",
+      "Enable Fail next upload to inspect the error and Retry action. Remove during upload cancels its simulated timer.",
+      "Preview text as plain text (first 20,000 characters); other formats show metadata."
+    ],
+    "keyboard": [
+      "Tab follows the native control order. Enter/Space activates buttons and checkboxes; native select and text-editing keys apply."
+    ],
+    "api": [
+      {
+        "name": "files",
+        "type": "AtlasAttachment[]",
+        "description": "Controlled id/name/size/status/progress/error metadata. Status is uploading, ready or error."
+      },
+      {
+        "name": "add / preview / retry / remove",
+        "type": "outputs",
+        "description": "add emits File[]; other outputs emit the stable attachment id. Your adapter owns IO, cancellation, validation and deletion."
+      },
+      {
+        "name": "disabled / accept",
+        "type": "boolean / string",
+        "description": "Disable actions or configure the native file picker. accept is a picker hint, not validation."
+      }
+    ],
+    "example": "<atlas-attachment-list [files]=\"files()\" (add)=\"upload($event)\" (preview)=\"preview($event)\" (retry)=\"retry($event)\" (remove)=\"remove($event)\" />",
+    "limits": [
+      "No network uploader or PDF/image viewer is bundled. The demo keeps File objects in memory, clears timers on disposal, and escapes preview text. Production adapters must handle cancellation, size/type validation and server errors."
+    ]
+  },
+  {
+    "id": "filter-builder",
+    "title": "Saved views and filter builder",
+    "category": "Business panels",
+    "status": "R&D preview",
+    "summary": "Compose AND conditions against an account list and save named filter snapshots for reuse.",
+    "steps": [
+      "Add a condition; choose a field, operator and value. The local result list updates immediately.",
+      "Load Active accounts or High balance, or save the current filters under a unique name.",
+      "Editing loaded conditions leaves the saved snapshot intact. Delete removes a saved view, not matching records."
+    ],
+    "keyboard": [
+      "Tab follows the native control order. Enter/Space activates buttons and checkboxes; native select and text-editing keys apply."
+    ],
+    "api": [
+      {
+        "name": "fields / rules",
+        "type": "AtlasFilterField[] / model<AtlasFilterRule[]>",
+        "description": "Text fields support contains/equals; numeric fields support equals/gte/lte. Stable rule IDs are required."
+      },
+      {
+        "name": "views / saveRequested / deleteRequested",
+        "type": "AtlasSavedView[] / outputs",
+        "description": "Consumer stores snapshots. Save emits a name; delete emits the view ID."
+      },
+      {
+        "name": "matchesFilterRules",
+        "type": "(row, rules) => boolean",
+        "description": "Pure AND matcher. Text matching ignores case, numeric comparisons reject empty/nonfinite operands. Missing fields do not match."
+      }
+    ],
+    "example": "<atlas-filter-builder [fields]=\"fields\" [(rules)]=\"rules\" [views]=\"views()\" (saveRequested)=\"saveView($event)\" (deleteRequested)=\"deleteView($event)\" />",
+    "limits": [
+      "Flat AND only: no nested OR, dates, column layouts, sorting or remote-query adapter. A saved view currently stores filters only. Saved views and all demo edits reset when the gallery is disposed or reloaded."
+    ]
+  },
+  {
+    "id": "document-viewer",
+    "title": "Document viewer and upload queue",
+    "category": "Documents",
+    "status": "R&D preview",
+    "summary": "Preview local images, PDF files and plain text, with a cancellable upload queue and retry.",
+    "steps": [
+      "Add a sample image, PDF or text file, or choose your own files up to 10 MB. Upload progress is simulated; no network request is made.",
+      "Preview a ready file. Images support zoom, rotation and reset. PDFs render locally with PDF.js, previous/next page, zoom and extracted page text. Download original is always available.",
+      "Enable Fail next upload to test retry. Remove cancels an active upload and clears its preview.",
+      "File previews and queue entries survive category switches and are released on gallery disposal."
+    ],
+    "keyboard": [
+      "Tab navigates controls; Enter/Space activates buttons. Open Page text for the extracted text of the rendered PDF page."
+    ],
+    "api": [
+      {
+        "name": "AtlasDocumentViewer.file",
+        "type": "File | null",
+        "description": "Local File input. Owns and revokes its generated object URL on replacement/disposal. No arbitrary URL input."
+      },
+      {
+        "name": "AtlasUploadQueue",
+        "type": "new(adapter, maxBytes?)",
+        "description": "Adapter receives File plus AbortSignal and progress callback. Default limit 10 MB. Call add, upload(id) for retry, remove(id) to abort/remove, and destroy on disposal."
+      },
+      {
+        "name": "AtlasUploadAdapter",
+        "type": "(file, {signal, progress}) => Promise<void>",
+        "description": "Consumer owns HTTP, remote IDs and server validation; resolve only when upload succeeds. Queue ignores stale progress/completions after cancellation."
+      },
+      {
+        "name": "AtlasDocumentViewer.pdfWorkerSrc / AtlasPdfViewer.workerSrc",
+        "type": "string",
+        "description": "Default assets/pdfjs/pdf.worker.min.mjs. Copy the matching pdfjs-dist build worker and standard_fonts directory to this asset folder; PDF.js is a peer dependency and is loaded lazily."
+      }
+    ],
+    "example": "// Import AtlasDocumentViewer from @bqatlas/ui/documents; AtlasAttachmentList and AtlasUploadQueue from @bqatlas/ui.\nreadonly queue = new AtlasUploadQueue(yourUploadAdapter);\n// Register queue.destroy() with DestroyRef.onDestroy.\n<atlas-document-viewer [file]=\"selectedFile()\" />",
+    "limits": [
+      "PDF.js canvas rendering with extracted text, not a full PDF editor: no annotations, forms, OCR or password-entry flow. Corrupt/protected files show an error. Rendered page dimensions are capped at 4096 pixels.",
+      "Image preview supports PNG, JPEG, WebP, GIF and AVIF MIME types; SVG and other formats use download fallback. Images are not edited or re-encoded by zoom/rotation.",
+      "Plain-text preview is limited to the first 100 KB and rendered as escaped text. Unsupported formats show a download fallback.",
+      "Demo uploads are simulated. Production adapters must validate file content and size on the server and persist returned document identifiers."
+    ]
+  }
+]

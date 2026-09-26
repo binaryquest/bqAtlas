@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><IsPackable>false</IsPackable><IsTestProject>true</IsTestProject></PropertyGroup><ItemGroup><ProjectReference Include="../../../samples/erp/server/Modules/Sales/Sales.csproj" />
+<ProjectReference Include="../../src/BqAtlas.Core/BqAtlas.Core.csproj" />
+<ProjectReference Include="../../../samples/erp/server/Modules/Crm/Crm.csproj" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" /><PackageReference Include="xunit" /><PackageReference Include="xunit.runner.visualstudio"><PrivateAssets>all</PrivateAssets></PackageReference>
+<None Include="../../../contracts/v1/fixtures/quote-totals.json" Link="Fixtures/quote-totals.json" CopyToOutputDirectory="PreserveNewest" /></ItemGroup></Project>

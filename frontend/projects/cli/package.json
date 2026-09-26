@@ -1,0 +1,29 @@
+{
+  "name": "@bqatlas/cli",
+  "version": "0.1.0-alpha.1",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "bqatlas": "./bin/bqatlas.mjs"
+  },
+  "files": [
+    "bin",
+    "templates",
+    "README.md",
+    "examples",
+    "SOURCE-NOTICE.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/binaryquest/bqAtlas.git",
+    "directory": "frontend/projects/cli"
+  },
+  "homepage": "https://github.com/binaryquest/bqAtlas#readme",
+  "bugs": {
+    "url": "https://github.com/binaryquest/bqAtlas/issues"
+  }
+}
