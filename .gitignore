@@ -1,4 +1,7 @@
 **/bin/
+# The npm CLI keeps its executable source in bin.
+!frontend/projects/cli/bin/
+!frontend/projects/cli/bin/**
 **/obj/
 **/node_modules/
 **/dist/
