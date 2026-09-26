@@ -36,6 +36,7 @@ jobs:
     needs: packages
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         database: [postgresql, sqlserver]
     services:

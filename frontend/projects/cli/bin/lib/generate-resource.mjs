@@ -115,7 +115,7 @@ ${filters}
         if (row is null) return null;
         if (id is not null && !VersionToken.Matches(expectedVersion, row.Version)) throw new VersionConflictException();
 ${fields.map(f=>`        row.${cap(f.name)} = value.${cap(f.name)};`).join('\n')}
-        row.Version = VersionToken.New(); row.ModifiedAt = DateTimeOffset.UtcNow; row.ModifiedBy = actor;
+        row.Version = VersionToken.New(); row.ModifiedAt = DatabaseTimestamp.UtcNow; row.ModifiedBy = actor;
         if (id is null) db.${p}.Add(row);
         await db.SaveWithConcurrencyAsync(ct); return new(row.ToDto(), row.Version);
     }

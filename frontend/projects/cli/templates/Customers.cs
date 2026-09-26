@@ -133,7 +133,7 @@ public sealed class CustomerService(CrmDbContext db)
         if (id is not null && !VersionToken.Matches(expectedVersion, row.Version)) throw new VersionConflictException();
         if (await db.Customers.AnyAsync(c => c.Code == value.Code && c.Id != row.Id, ct)) throw new ResourceValidationException(new Dictionary<string, string[]> { ["code"] = ["This customer code already exists."] });
         row.Code = value.Code; row.Name = value.Name; row.Email = value.Email; row.Active = value.Active;
-        row.SearchName = CustomerRules.SearchKey(value.Name); row.Version = VersionToken.New(); row.ModifiedAt = DateTimeOffset.UtcNow; row.ModifiedBy = actor;
+        row.SearchName = CustomerRules.SearchKey(value.Name); row.Version = VersionToken.New(); row.ModifiedAt = DatabaseTimestamp.UtcNow; row.ModifiedBy = actor;
         if (id is null) db.Customers.Add(row);
         await db.SaveWithConcurrencyAsync(ct);
         return new(row.ToDto(), row.Version);

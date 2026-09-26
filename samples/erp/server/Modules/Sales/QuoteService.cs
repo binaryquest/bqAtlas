@@ -78,7 +78,7 @@ public sealed class QuoteService(SalesDbContext db, ICustomerDirectory customers
         if (quote.Status != "draft") throw new BusinessConflictException("This quote has already been submitted.", "quote_already_submitted");
         var customer = await customers.FindAsync(quote.CustomerId, ct);
         if (customer is null || !customer.Active) throw new BusinessConflictException("The customer is no longer active. Choose an active customer before submitting.", "customer_unavailable");
-        quote.Status = "submitted"; quote.SubmittedAt = DateTimeOffset.UtcNow;
+        quote.Status = "submitted"; quote.SubmittedAt = DatabaseTimestamp.UtcNow;
         Stamp(quote, actor, "submitted");
         db.Submissions.Add(new QuoteSubmission { QuoteId = id, Actor = actor, Key = token, Version = quote.Version });
         try { await db.SaveWithConcurrencyAsync(ct); }
@@ -95,7 +95,7 @@ public sealed class QuoteService(SalesDbContext db, ICustomerDirectory customers
     private static RecordResult<QuoteDto> Envelope(Quote quote) => new(quote.ToDto(), quote.Version);
     private void Stamp(Quote quote, string actor, string operation)
     {
-        quote.Version = VersionToken.New(); quote.ModifiedAt = DateTimeOffset.UtcNow; quote.ModifiedBy = actor;
+        quote.Version = VersionToken.New(); quote.ModifiedAt = DatabaseTimestamp.UtcNow; quote.ModifiedBy = actor;
         db.Operations.Add(new QuoteOperation { Id = Guid.NewGuid(), QuoteId = quote.Id, Operation = operation, Actor = actor, OccurredAt = quote.ModifiedAt, Version = quote.Version });
     }
 }
