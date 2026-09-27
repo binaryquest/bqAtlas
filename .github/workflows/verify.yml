@@ -79,6 +79,10 @@ jobs:
         env:
           BQATLAS_TEST_PROVIDER: ${{ matrix.database }}
           BQATLAS_TEST_CONNECTION: ${{ matrix.database == 'postgresql' && 'Host=localhost;Port=25432;Database=postgres;Username=postgres;Password=bqatlas-ci-only' || 'Server=localhost,21433;Database=master;User Id=sa;Password=BqAtlas-CI-only!123;TrustServerCertificate=true' }}
+      - run: node scripts/verify-keycloak-runtime.mjs
+        env:
+          BQATLAS_TEST_PROVIDER: ${{ matrix.database }}
+          BQATLAS_TEST_CONNECTION: ${{ matrix.database == 'postgresql' && 'Host=localhost;Port=25432;Database=postgres;Username=postgres;Password=bqatlas-ci-only' || 'Server=localhost,21433;Database=master;User Id=sa;Password=BqAtlas-CI-only!123;TrustServerCertificate=true' }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -90,3 +94,6 @@ jobs:
             artifacts/starter-runtime-*/results/*.trx
             artifacts/starter-runtime-*/verification.json
             artifacts/starter-runtime-*/database-lifecycle.json
+            artifacts/keycloak-runtime-*/results/*.trx
+            artifacts/keycloak-runtime-*/verification.json
+            artifacts/keycloak-runtime-*/database-lifecycle.json

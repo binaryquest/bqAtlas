@@ -66,6 +66,8 @@ Integration tests require a PostgreSQL or SQL Server connection and create/drop 
 
 For the complete generated starter workflow, run `node scripts/verify-starter-runtime.mjs` after packing. This launches the generated host, serves its Angular build, applies/reapplies migrations, exercises real local login and the Customer/Quote workflow, restarts it and cleans up its isolated database. See [STARTER-RUNTIME.md](docs/STARTER-RUNTIME.md).
 
+For repeatable live Keycloak qualification after packing, run `node scripts/verify-keycloak-runtime.mjs`. It starts its own disposable provider, verifies admin/reader/unassigned login and direct API permissions, checks logout, and cleans up its private realm and test database. Docker and a configured test database server are required. See [KEYCLOAK-READER.md](docs/KEYCLOAK-READER.md).
+
 For live generated-resource checks after packing, run `node scripts/verify-generated-resource.mjs`. It reads your local development connection (or explicit `BQATLAS_TEST_PROVIDER` / `BQATLAS_TEST_CONNECTION`), creates a uniquely named test database, exercises generated CRUD/OData and the actual frontend adapters, and deletes that database. See [GENERATED-RUNTIME.md](docs/GENERATED-RUNTIME.md).
 
 Package output: `artifacts/npm/*.tgz` and `artifacts/nuget/*.nupkg`. The verification script installs the template into an isolated cache, generates a starter, restores only package references, builds/tests backend and frontend, and compiles a scaffolded module.

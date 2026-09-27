@@ -12,7 +12,7 @@ This table describes the current local `0.1.0-alpha.1` preview. A dependency pin
 | Node | 24.15.0 in `.nvmrc`; minimum 24.15 in package engines | Library, CLI and clean-consumer builds/tests; other allowed Node versions are not independently qualified |
 | Angular | Runtime packages 22.1.7; build/CLI 22.1.8; ng-packagr 22.1.1 | Source build/tests and all four generated database/auth frontend configurations |
 | TypeScript | `~6.0.0` | Version resolved by the repository lockfile and tested consumers; no blanket TypeScript minor-version compatibility claim |
-| Keycloak | Development image 26.7.0 | Live admin/reader login/logout and unassigned-user UI; synthetic negative protocol and direct authorization tests are separate evidence |
+| Keycloak | Development image 26.7.0 | Live browser admin/reader login/logout and unassigned-user UI; packaged PostgreSQL verifier covers real-provider callbacks, all three roles, draft/direct API denial and full logout; synthetic negative protocol tests remain separate evidence |
 | Other identity providers | Standard configurable ASP.NET OIDC integration | No second live provider certified. OAuth2-only providers need an explicit identity handler/broker; opaque access-token introspection is not implemented |
 | Browser | Codex in-app browser on this development host | Recorded Customer/quote/workspace/mobile workflows. No Chrome/Edge/Firefox/Safari support matrix or WCAG conformance claim yet |
 | PDF documents | Optional `@bqatlas/ui/documents` peer | Basic consumers prove PDF.js is not installed; this does not qualify every document renderer or worker deployment |

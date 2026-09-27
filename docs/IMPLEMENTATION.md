@@ -2,6 +2,8 @@
 
 ## Current qualification
 
+Live Keycloak authorization now has a repeatable installed-package verifier (`scripts/verify-keycloak-runtime.mjs`). The PostgreSQL run `keycloak-runtime-1790478728158` passed real login/PKCE, exact role mapping, draft capability restrictions, twelve direct API denials, unchanged record versions and application/provider logout. It removed its exact disposable database, container and private realm. CI includes it for both database providers. See KEYCLOAK-READER.md for scope and the distinction from browser rendering and synthetic callback tests.
+
 The [successful CI run for `34b279c`](https://github.com/binaryquest/bqAtlas/actions/runs/36248327026) verifies source tests, all four package-consumer configurations and real PostgreSQL/SQL Server integration, generated CRUD and installed-starter runtime. The timestamp correction includes five regression cases (38 backend unit tests total). Package publishing remains deferred.
 
 The forms-and-controls showcase is now integrated into the sample home and Start menu and generated starters. A clean source walkthrough verified setup preservation, migrations, first login, singleton launch, local sample save/dirty-close and form interaction. See STARTER-QUICKSTART.md and SHOWCASE.md.
