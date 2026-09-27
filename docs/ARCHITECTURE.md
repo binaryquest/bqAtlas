@@ -405,4 +405,4 @@ Open product decisions:
 - Public registry identities, source repository location and licensing before release.
 - Exact stable dependency versions and supported browser matrix at implementation kickoff; the current Atlas baseline is Angular 22.1.7.
 
-This specification supersedes the integration path in [the earlier study](ATLAS-UI-INTEGRATION-STUDY.md). That study remains useful as a record of the existing code and its limitations.
+This specification supersedes the earlier proposal to integrate Atlas into the existing bqStart application. bqAtlas is maintained as a separate framework and starter.
