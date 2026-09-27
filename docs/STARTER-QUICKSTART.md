@@ -72,7 +72,7 @@ npx --no-install bqatlas generate crud --spec resource-specs/inventory/product.r
 dotnet test inventory-module/tests/Inventory.Tests
 ```
 
-Follow `inventory-module/README.md` to register the module, controller, resource, permissions, frontend feature and migrations. Generation intentionally leaves these application decisions explicit. See [RESOURCE-GENERATION.md](RESOURCE-GENERATION.md) for field types and safe regeneration.
+Follow [the module-authoring walkthrough](MODULE-AUTHORING.md) for concrete host, migration, permission and frontend registration steps. That walkthrough retains generated output under `features/inventory`; use one output location consistently. Generation intentionally leaves these application decisions explicit. See [RESOURCE-GENERATION.md](RESOURCE-GENERATION.md) for field types and safe regeneration.
 
 ## Other choices and troubleshooting
 

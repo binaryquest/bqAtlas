@@ -30,7 +30,7 @@ import {BusinessExamples} from './business-examples';
       <section [hidden]="section()!=='crud'" aria-label="CRUD examples">
         <div class="lab-section-intro"><div><h3>From a simple record to a full aggregate</h3><p>These views use the actual backend, permissions, validation and optimistic concurrency.</p></div></div>
         <div class="showcase-cards">
-          @for(item of crud.menus();track item.resource){<button class="showcase-card" (click)="crud.openList(item.resource)"><strong>{{item.title}}</strong><span>{{item.resource==='crm.customers'?'Metadata-driven CRUD: create, edit, filter, validate and delete customer records.':'Header and child lines, remote customer lookup, exact decimal totals and submit workflow.'}}</span><small>Open real records →</small></button>}
+          @for(item of crud.menus();track item.resource){<button class="showcase-card" (click)="crud.openList(item.resource)"><strong>{{item.title}}</strong><span>{{item.resource==='sales.quotes'?'Header and child lines, remote customer lookup, exact decimal totals and submit workflow.':'Metadata-driven CRUD: create, edit, filter, validate and delete records.'}}</span><small>Open real records →</small></button>}
         </div>
         @if(!crud.menus().length){<p>No CRUD views are available for your account.</p>}
       </section>

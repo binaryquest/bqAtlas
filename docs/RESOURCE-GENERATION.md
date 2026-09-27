@@ -1,5 +1,7 @@
 # Resource-driven CRUD generation
 
+For the complete host, migration, permissions and frontend integration, follow [Add an Inventory module](MODULE-AUTHORING.md).
+
 The CLI supports `bqatlas generate crud --spec resource-specs/inventory/product.resource.json --out ./inventory-module`. Add `--dry-run` to inspect its deterministic ownership/hash manifest without writing output. New starter templates include the Product specification; the npm CLI also includes it under `examples/`.
 
 The specification declares schema version 1, module/entity/plural names, resource ID, UUID `id` key, distinct read/write/delete/lookup permission IDs, fields, list columns/default sort and form order. Unknown properties are rejected. Supported scalar field types are string, email, boolean, 32-bit integer, date-only, enum and non-negative decimal. Each field declares a typed default and whether it is required. Text fields declare bounded lengths; enum fields declare allowed values; decimals declare scale (0–4) and an exact string maximum, with up to 14 integral digits. Decimal validation uses exact units rather than JavaScript floating-point comparisons.

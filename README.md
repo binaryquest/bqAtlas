@@ -92,6 +92,8 @@ Production needs HTTPS, explicit provisioning/migrations, and persisted/shared A
 
 ## Scaffold a module
 
+For the complete host, migration, permissions and frontend integration, follow [Add an Inventory module](docs/MODULE-AUTHORING.md).
+
 Generate typed CRUD from an explicit resource definition:
 
 ```sh

@@ -48,6 +48,8 @@ put('README.md','''# BqAtlas.Sample
 
 Generated bqAtlas development starter, ASP.NET Core 10 + Angular 22.
 
+To integrate a generated resource, follow the [module-authoring walkthrough](https://github.com/binaryquest/bqAtlas/blob/main/docs/MODULE-AUTHORING.md), including provider migrations and explicit permission grants.
+
 1. Install .NET SDK 10.0.201+, Node 24.15+, and Docker.
 2. Run `node scripts/setup-dev.mjs`. Open the generated `.env` to see your unique development account credentials.
 3. Run `docker compose --profile postgresql up -d --wait` (or use your SQL Server connection and set `Database__Provider=sqlserver`).
