@@ -2,7 +2,11 @@
 
 ## Current qualification
 
-UI follow-up: the source starter now uses one taskbar with a bqAtlas Start launcher; account identity appears as a clickable avatar section that opens a User account dialog. Local password change is inside that dialog; sign-out remains in Start. External accounts see identity-provider guidance. Close all windows is in the same menu. The separate header is removed. Production build and 99 existing frontend tests pass; browser review verifies menu keyboard navigation, opening Customers and closing all clean windows. Existing package reports below predate this layout change; archives have not yet been refreshed for it.
+The [successful CI run for `34b279c`](https://github.com/binaryquest/bqAtlas/actions/runs/36248327026) verifies source tests, all four package-consumer configurations and real PostgreSQL/SQL Server integration, generated CRUD and installed-starter runtime. The timestamp correction includes five regression cases (38 backend unit tests total). Package publishing remains deferred.
+
+The forms-and-controls showcase is now integrated into the sample home and Start menu and generated starters. A clean source walkthrough verified setup preservation, migrations, first login, singleton launch, local sample save/dirty-close and form interaction. See STARTER-QUICKSTART.md and SHOWCASE.md.
+
+UI follow-up: the source starter now uses one taskbar with a bqAtlas Start launcher; account identity appears as a clickable avatar section that opens a User account dialog. Local password change is inside that dialog; sign-out remains in Start. External accounts see identity-provider guidance. Close all windows is in the same menu. The separate header is removed. Production build and 99 existing frontend tests pass; browser review verifies menu keyboard navigation, opening Customers and closing all clean windows. Historical local reports below predate this layout change; the linked CI run includes it.
 
 The complete current source integration suite passes all 31 tests on PostgreSQL (`artifacts/integration-postgresql-current/postgresql.trx`), including the added external-role authorization checks. This is a separate source result from the packaged-consumer evidence below.
 
@@ -12,7 +16,7 @@ Browser evidence now includes simultaneous retained drafts, stale-save retention
 
 The failed cleanup after the latest keyboard review was reconciled by identifying and deleting its exact disposable database. The revised harness preserves credential-free database lifecycle evidence and passed a fresh installed-consumer PostgreSQL workflow with automatic deletion (`starter-lifecycle-check/results/lifecycle.trx`). Package bytes were unchanged.
 
-The release remains incomplete: SQL Server real-engine migrations/Identity/API/starter verification needs a suitable environment; remaining browser/provider qualification is tracked in ACCEPTANCE.md; the canonical public repository is binaryquest/bqAtlas and MIT licensing is confirmed. npm/NuGet ownership, publication and registry installation checks are deferred by the owner. No packages have been published.
+The release remains incomplete: remaining browser/provider qualification is tracked in ACCEPTANCE.md; the canonical public repository is binaryquest/bqAtlas and MIT licensing is confirmed. npm/NuGet ownership, publication and registry installation checks are deferred by the owner. No packages have been published.
 
 ## Historical first increment
 

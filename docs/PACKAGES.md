@@ -1,6 +1,6 @@
 # Local packages and coordinated upgrades
 
-The current release is an unpublished `0.1.0-alpha.1` preview. Four npm tarballs, five framework NuGet packages and one template NuGet package are built into `artifacts/`. The source is MIT-licensed at https://github.com/binaryquest/bqAtlas. Registry ownership, publication and release provenance are deferred. Existing archives predate this metadata; rebuild before distributing them. `SOURCE-NOTICE.md` records the origin of reused source; it is not a distribution license.
+The current release is an unpublished `0.1.0-alpha.1` preview. Four npm tarballs, five framework NuGet packages and one template NuGet package are built into `artifacts/`. The source is MIT-licensed at https://github.com/binaryquest/bqAtlas. Registry ownership, publication and release provenance are deferred. Rebuild artifacts after source changes; CI validates the MIT license and repository metadata in all ten archives. `SOURCE-NOTICE.md` records the origin of reused source; it is not a distribution license.
 
 ## Build and verify
 
@@ -10,6 +10,8 @@ node scripts/verify-packages.mjs
 ```
 
 Packing builds Angular libraries, copies the current sample into the starter template, packs every artifact, checks each archive's README/source notice and writes `artifacts/release-manifest.json`. Verification installs into an isolated template engine and restores actual package dependencies into a private cache, then runs the generated build/test matrix. Each of the four database/auth combinations receives its own generated frontend install, production build and unit-test run as well as backend build/unit tests. The report records these checks per combination. CI retains the release manifest and consumer verification reports separately from the package files. This matrix does not start a database or certify a live OIDC provider; runtime qualification is separate. Use Node 24.15+ and .NET SDK 10.0.201+. Follow the repository quickstart for installing dependencies first.
+
+For a complete new application, follow [the starter quickstart](STARTER-QUICKSTART.md), including local NuGet sources and installation of all npm peers.
 
 ## Consume locally
 

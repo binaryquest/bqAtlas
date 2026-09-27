@@ -4,6 +4,8 @@ An ERP application framework and starter kit: ASP.NET Core 10, Angular 22, Atlas
 
 **Status: first working development preview, `0.1.0-alpha.1`.** This implements customer master data and a Sales quote aggregate. The complete first-release architecture is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md); outstanding work is tracked in [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md).
 
+To create a separate application using the unpublished packages, follow [the starter quickstart](docs/STARTER-QUICKSTART.md).
+
 ## Run the sample
 
 Requires .NET SDK 10.0.201+, Node 24.15+, npm, and Docker. The PostgreSQL container uses its own volume and localhost port 25432.
@@ -26,13 +28,15 @@ npm start
 
 Open **http://127.0.0.1:4200**. The unique development email/password are in the ignored `.env` file, under `Bootstrap__Email` and `Bootstrap__Password`. The bootstrap creates a new user only in Development; it never resets or elevates an existing user. No password is stored in committed configuration.
 
+Open **Explore forms & controls** on the home screen, or **Forms & controls** in the Start menu, to try the integrated [showcase](docs/SHOWCASE.md).
+
 ## What works now
 
 - Atlas workspace with retained, independent customer editors, dirty-close prompts, async save, permission-filtered menus, server errors, and session cleanup.
 - CRM module with validated REST CRUD, search/filter/sort/paging, audit fields, optimistic concurrency (`If-Match`), and bounded OData reads over public DTOs.
 - Sales quotes with independent master/detail editors, remote customer lookup, exact decimal-string amounts, atomic header/line updates, audit records, ETags and idempotent submission.
 - Local ASP.NET Core Identity cookie login/logout and verified password change, CSRF protection, login throttling, and standard external OIDC configuration with authorization code + PKCE.
-- PostgreSQL and SQL Server provider selection with separate CRM, Sales and Identity migrations. PostgreSQL integration tests have run locally; SQL Server runtime validation is pending.
+- PostgreSQL and SQL Server provider selection with separate CRM, Sales and Identity migrations. Both providers pass CI integration, generated CRUD and installed starter runtime checks.
 - Four npm packages, five framework NuGet packages, a sixth NuGet template package, and a master-data scaffolding CLI. Artifacts are built locally; nothing has been published to public registries.
 
 ## Packages
@@ -104,10 +108,10 @@ node frontend/projects/cli/bin/bqatlas.mjs scaffold master-data \
 
 Add `--dry-run` to preview a deterministic JSON manifest without writing files. Generated output includes `bqatlas.generation.json` with source hashes and a runnable .NET test project covering baseline validation and resource metadata. The generated README explains explicit module registration, permission grants, and migrations. Initial generation refuses existing output, including during previews. Resource-spec regeneration is explicit and refuses modified generated source; it does not silently alter the application host or overwrite custom rules.
 
-Public npm/NuGet publication requires confirmed namespace ownership and a distribution license. No license has been inferred from the old projects; see [docs/SOURCE-NOTICE.md](docs/SOURCE-NOTICE.md).
+Public npm/NuGet publication is deferred. The project is MIT licensed; see [docs/SOURCE-NOTICE.md](docs/SOURCE-NOTICE.md) for source provenance.
 
 Package installation and coordinated upgrade guidance: [docs/PACKAGES.md](docs/PACKAGES.md).
 
 ## License and repository
 
-MIT licensed — see [LICENSE](LICENSE). The canonical repository is [binaryquest/bqAtlas](https://github.com/binaryquest/bqAtlas). npm and NuGet publication are deferred; use the local package workflow for this preview. SQL Server runtime verification remains pending.
+MIT licensed — see [LICENSE](LICENSE). The canonical repository is [binaryquest/bqAtlas](https://github.com/binaryquest/bqAtlas). npm and NuGet publication are deferred; use the local package workflow for this preview. Both database providers are verified in CI.

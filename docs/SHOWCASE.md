@@ -12,6 +12,8 @@ Source: `frontend/projects/erp/src/showcase/`. The samples use the existing Atla
 
 Sample values are held in memory and reset when the showcase window closes. They do not create production records. Numeric control examples use their original numeric models; the actual Sales quote example remains the reference for exact decimal business amounts. Server paging and upload demonstrations explicitly simulate latency/failures.
 
-The new components and templates compile independently. A complete isolated application build passes in `/tmp/bqatlas-showcase-preview`. Browser checks on port 4201 verified the purchase reference dirty state/local save, multi-column keyboard selection, radio/checkbox interaction, table warehouse filter and row selection, and supplier form review. Existing user work on port 4200 was not reloaded.
+## Open the showcase
 
-Integration into the primary Start menu/home launcher is prepared in `docs/patches/showcase-launcher.patch`; apply after the user confirms their current draft is safe to reload. The separate preview already includes that integration. Local package archives have not been refreshed for these UI follow-ups.
+Run the main sample, sign in, then select **Explore forms & controls** on the home screen or **Forms & controls** in the Start menu. Both launch the same singleton workspace window. The showcase is also included in newly generated starters.
+
+All control examples are available to signed-in users. Links to real CRUD views remain filtered by the account's permissions. Purchase-order edits use the workspace's normal save/discard/cancel flow.

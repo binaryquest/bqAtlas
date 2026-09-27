@@ -5,10 +5,10 @@ This table describes the current local `0.1.0-alpha.1` preview. A dependency pin
 | Component | Repository configuration | Verified scope |
 | --- | --- | --- |
 | .NET | SDK 10.0.201, `latestFeature` roll-forward; `net10.0` | Source and installed-consumer builds/tests on this development host; later SDK feature bands are allowed but not independently qualified |
-| ASP.NET Core / EF Core | Identity, OIDC, JWT and EF packages 10.0.10 | Local Identity and application APIs on PostgreSQL; isolated OIDC callback and external-cookie authorization tests |
+| ASP.NET Core / EF Core | Identity, OIDC, JWT and EF packages 10.0.10 | Local Identity and application APIs on PostgreSQL and SQL Server; isolated OIDC callback and external-cookie authorization tests |
 | PostgreSQL | `postgres:18.4-trixie`; Npgsql EF provider 10.0.3 | Real migrations, Identity, CRUD/query/concurrency, quote transactions, generated resource parity and installed-starter runtime pass |
-| SQL Server | `2022-latest` container configuration; EF provider 10.0.10 | Both template authentication choices build and pass unit tests; real-engine runtime/migrations/Identity remain unqualified. The container tag is mutable, so a release must record the exact tested server build/image identity |
-| OData | Microsoft.AspNetCore.OData 9.5.0 | Bounded authorized DTO reads and actual packaged frontend adapter fixtures on PostgreSQL |
+| SQL Server | `2022-latest` container configuration; EF provider 10.0.10 | Both authentication choices build; real-engine integration, migrations, local Identity, generated CRUD and installed starter runtime pass in CI. The container tag is mutable, so a release must record the exact tested server build/image identity |
+| OData | Microsoft.AspNetCore.OData 9.5.0 | Bounded authorized DTO reads and actual packaged frontend adapter fixtures on PostgreSQL and SQL Server |
 | Node | 24.15.0 in `.nvmrc`; minimum 24.15 in package engines | Library, CLI and clean-consumer builds/tests; other allowed Node versions are not independently qualified |
 | Angular | Runtime packages 22.1.7; build/CLI 22.1.8; ng-packagr 22.1.1 | Source build/tests and all four generated database/auth frontend configurations |
 | TypeScript | `~6.0.0` | Version resolved by the repository lockfile and tested consumers; no blanket TypeScript minor-version compatibility claim |
@@ -29,6 +29,6 @@ Source integration evidence is separate: the complete current PostgreSQL integra
 
 ## Gates that still prevent first-release completion
 
-An x64 SQL Server test environment remains required for the real-provider suite; its generated solution builds alone are insufficient. Controlled browser timing, REST cancellation and successful quote keyboard workflows now have recorded evidence; remaining accessibility and browser coverage are tracked in ACCEPTANCE.md. Native dialog behavior could not be fully observed through the current browser tooling and remains unqualified.
+GitHub Linux x64 runners now provide the SQL Server test environment; both provider runtime jobs pass in [successful CI run for `34b279c`](https://github.com/binaryquest/bqAtlas/actions/runs/36248327026). Controlled browser timing, REST cancellation and successful quote keyboard workflows now have recorded evidence; remaining accessibility and browser coverage are tracked in ACCEPTANCE.md. Native dialog behavior could not be fully observed through the current browser tooling and remains unqualified.
 
-The canonical public repository is https://github.com/binaryquest/bqAtlas and the source is MIT-licensed. npm/NuGet namespace ownership, release provenance and publication are deferred by the owner. Existing local archives predate the MIT metadata and recent UI changes; rebuild and verify before distributing a refreshed package set. SQL Server runtime remains unqualified.
+The canonical public repository is https://github.com/binaryquest/bqAtlas and the source is MIT-licensed. npm/NuGet namespace ownership, release provenance and publication are deferred by the owner. The linked CI artifacts include MIT metadata and verified runtime reports. Rebuild and verify after subsequent source changes; historical local archives are not automatically refreshed.
