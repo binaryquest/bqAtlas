@@ -36,3 +36,7 @@ All control examples are available to signed-in users. Links to real CRUD views 
 - **Virtualized inventory:** 50,000 loaded sample rows, search/warehouse filters, sorting, compact/comfortable row heights, keyboard navigation, record inspection and load-error retry.
 
 These examples are included in generated starters. Their data and drafts are local to each task. See [Analytics and planning](ANALYTICS-AND-PLANNING.md) for exported APIs and limits.
+
+## Batch 6
+
+**Feedback & guidance** opens a local inventory import desk with alert/confirm/prompt dialogs, help tooltip/popover, loading mask, determinate/indeterminate progress, cancellation, failure/retry, notices and status. Open independent imports to compare isolated state. See [Feedback and guidance](FEEDBACK-AND-GUIDANCE.md).

@@ -42,3 +42,4 @@ export * from './lib/analytics';
 export * from './lib/calendar';
 export * from './lib/rich-text';
 export * from './lib/virtual-grid';
+export * from './lib/feedback';

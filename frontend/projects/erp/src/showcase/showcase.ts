@@ -1,3 +1,4 @@
+import { FeedbackExamples } from "./feedback-examples";
 import {
   AnalyticsExamples,
   PlanningExamples,
@@ -44,6 +45,7 @@ import { BusinessExamples } from "./business-examples";
     GroupedExamples,
     HierarchyExamples,
     CommandExamples,
+    FeedbackExamples,
     AnalyticsExamples,
     PlanningExamples,
     VirtualInventoryExamples,
@@ -213,6 +215,9 @@ import { BusinessExamples } from "./business-examples";
           @if (visited().has("commands")) {
             <demo-commands [hidden]="section() !== 'commands'" />
           }
+          @if (visited().has("feedback")) {
+            <demo-feedback [hidden]="section() !== 'feedback'" />
+          }
           @if (visited().has("analytics")) {
             <demo-analytics [hidden]="section() !== 'analytics'" />
           }
@@ -292,6 +297,8 @@ export class Showcase {
     this.sections.find((item) => item.id === this.section()),
   );
   readonly apiNotes: Record<string, string> = {
+    feedback:
+      "AtlasMessageBox, AtlasNotice, AtlasProgress, AtlasLoadingRegion, AtlasTooltip, AtlasPopover and AtlasStatusBar. Escape dismisses dialogs/help; Tab navigates actions. Cancellation retains the local preview.",
     analytics:
       "AtlasPivotTable, AtlasChart, AtlasDashboard / AtlasDashboardPanel. Panel buttons support keyboard reordering; chart points support Enter/Space and include a data table.",
     planning:
@@ -320,7 +327,7 @@ export class Showcase {
       ? "Start here"
       : ["customer", "master", "crud", "business"].includes(id)
         ? "Business screens"
-        : id === "layouts"
+        : ["layouts", "feedback"].includes(id)
           ? "Layout & forms"
           : "Data & selection";
   }
@@ -336,6 +343,12 @@ export class Showcase {
 
   readonly sections = [
     { id: "overview", title: "Overview", description: "" },
+    {
+      id: "feedback",
+      title: "Feedback & guidance",
+      description:
+        "Alerts, confirmations, prompts, contextual help and a cancellable import with loading, progress, retry and status.",
+    },
     {
       id: "analytics",
       title: "Analytics & dashboards",

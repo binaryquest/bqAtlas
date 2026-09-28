@@ -1,3 +1,4 @@
+import { FeedbackDemoTask } from "./showcase/feedback-examples";
 import { PlanningDemoTask } from './showcase/advanced-examples';
 import { CommandDemoTask } from "./showcase/command-examples";
 import {
@@ -155,6 +156,7 @@ class App {
   password = "";
   constructor() {
     initialRecoveryLink = null;
+    this.workspace.register({id:"bqatlas.feedback",title:"Inventory import",icon:"box",component:FeedbackDemoTask,instance:"multiple",width:1040,height:760});
     this.workspace.register({id:"bqatlas.planning",title:"Delivery plan",icon:"orders",component:PlanningDemoTask,instance:"multiple",width:1120,height:780});
     this.workspace.register({id:"bqatlas.commands",title:"Price-list workbench",icon:"orders",component:CommandDemoTask,instance:"multiple",width:1050,height:760});
     this.workspace.register({id:"bqatlas.showcase",title:"Forms & controls",icon:"grid",component:Showcase,instance:"singleton",width:1120,height:780});

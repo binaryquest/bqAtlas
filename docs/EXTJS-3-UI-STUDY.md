@@ -92,6 +92,10 @@ Add decimal-safe pivot summaries, small bar/line charts with a data table, drill
 
 Add a month calendar with agenda, structured block-based rich-text notes and a fixed-row virtual grid. Delivery plans demonstrate signal forms, retained local drafts and independent task instances; inventory demonstrates 50,000 loaded records with bounded rendering. See [Analytics and planning](ANALYTICS-AND-PLANNING.md) for APIs, keyboard behavior and first-release limits.
 
+### Batch 6: feedback and guidance (implemented)
+
+Add alert/confirm/prompt message boxes, notices, native progress, loading regions, contextual tooltip/popover help and a status bar. The inventory import example demonstrates validation, cancellation, failed-operation retry and isolated task state. See [Feedback and guidance](FEEDBACK-AND-GUIDANCE.md) for APIs and lifecycle boundaries.
+
 ## Acceptance for each addition
 
 A reusable exported API; no breaking changes to existing views; component behavior tests; Angular form integration where applicable; keyboard and focus review; two retained task instances without state leakage; compact and comfortable layouts; narrow-screen behavior; explicit data ownership; a starter example and usage documentation. Async controls must retain drafts on errors and reject stale results. Real-data examples enforce permissions on the server as well as in the UI.
