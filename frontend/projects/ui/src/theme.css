@@ -2406,3 +2406,54 @@ atlas-command-toolbar { position: relative; min-width: 0; }
 atlas-item-selector { display: block; container-type: inline-size; }
 atlas-popup-menu { display: contents; }
 .atlas-toolbar-measure .atlas-command-group-start { margin-inline-start: 8px; }
+
+.atlas-pivot-table caption { padding: 10px; text-align: start; font-weight: 600; color: var(--atlas-text); }
+.atlas-pivot-table td, .atlas-pivot-table thead th:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.atlas-pivot-table tfoot { font-weight: 600; background: var(--atlas-subtle); }
+.atlas-pivot-cell { border: 0; padding: 5px; color: var(--atlas-accent); background: transparent; font: inherit; cursor: pointer; }
+.atlas-chart { margin: 0; min-width: 0; }
+.atlas-chart figcaption { font-weight: 600; margin-bottom: 8px; }
+.atlas-chart svg { display: block; width: 100%; min-width: 260px; }
+.atlas-chart text { fill: var(--atlas-muted); font: 11px var(--atlas-font); }
+.atlas-chart-grid { stroke: var(--atlas-border); stroke-dasharray: 3 3; }
+.atlas-chart-axis { stroke: var(--atlas-muted); }
+.atlas-chart-line { stroke: var(--atlas-accent); stroke-width: 2; fill: none; }
+.atlas-chart-mark { fill: var(--atlas-accent); opacity: .8; cursor: pointer; }
+.atlas-chart-mark:hover, .atlas-chart-mark[aria-pressed="true"] { opacity: 1; stroke: var(--atlas-text); stroke-width: 2; }
+.atlas-chart-mark:focus-visible { outline: 2px solid var(--atlas-text); outline-offset: 3px; }
+.atlas-chart details { margin-top: 10px; }
+.atlas-dashboard { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,440px),1fr)); gap: 16px; }
+.atlas-dashboard-panel { min-width: 0; border: 1px solid var(--atlas-border); border-radius: 8px; background: var(--atlas-surface); }
+.atlas-dashboard-panel > header { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--atlas-border); }
+.atlas-dashboard-panel > header > div { display: flex; gap: 4px; }
+.atlas-dashboard-content { padding: 14px; overflow: auto; }
+.atlas-calendar > header { display: flex; gap: 12px; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.atlas-calendar h3 { margin: 0; }
+.atlas-calendar table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.atlas-calendar th { font-weight: 500; color: var(--atlas-muted); font-size: 11px; padding: 6px 0; }
+.atlas-calendar td { border: 1px solid var(--atlas-border); padding: 0; }
+.atlas-calendar td > button { display: flex; flex-direction: column; gap: 5px; width: 100%; min-height: 64px; padding: 8px; border: 0; color: var(--atlas-text); background: var(--atlas-surface); text-align: start; font: inherit; cursor: pointer; }
+.atlas-calendar td[aria-selected="true"] > button { background: var(--atlas-accent-soft); box-shadow: inset 0 0 0 2px var(--atlas-accent); }
+.atlas-calendar-outside > button { opacity: .55; }
+.atlas-calendar small { color: var(--atlas-accent); font-size: 10px; }
+.atlas-calendar-agenda { margin-top: 16px; }
+.atlas-calendar-agenda > button { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; width: 100%; margin-top: 6px; }
+.atlas-rich-editor { min-width: 0; margin: 0; padding: 16px; border: 1px solid var(--atlas-border); border-radius: 6px; }
+.atlas-rich-editor legend { font-weight: 600; padding: 0 6px; }
+.atlas-rich-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.atlas-rich-tools label { display: flex; align-items: center; gap: 6px; }
+.atlas-rich-tools [aria-pressed="true"] { background: var(--atlas-accent-soft); border-color: var(--atlas-accent); }
+.atlas-rich-block { margin-top: 16px; }
+.atlas-rich-block textarea { width: 100%; box-sizing: border-box; margin-top: 8px; resize: vertical; }
+.atlas-rich-preview { margin-top: 18px; border-top: 1px solid var(--atlas-border); white-space: pre-wrap; overflow-wrap: anywhere; }
+.atlas-rich-bold { font-weight: 700; }
+.atlas-rich-italic { font-style: italic; }
+.atlas-virtual-grid { overflow: auto; border: 1px solid var(--atlas-border); border-radius: 6px; position: relative; }
+.atlas-virtual-grid:focus-visible { outline: 2px solid var(--atlas-accent); outline-offset: 2px; }
+.atlas-virtual-grid .atlas-table { table-layout: fixed; border-collapse: separate; border-spacing: 0; width: 100%; }
+.atlas-virtual-grid thead { position: sticky; top: 0; z-index: 1; background: var(--atlas-subtle); }
+.atlas-virtual-grid thead th { height: 32px; box-sizing: border-box; padding: 4px 10px; }
+.atlas-virtual-grid .atlas-virtual-data { height: var(--atlas-virtual-row-height); }
+.atlas-virtual-grid .atlas-virtual-data td { height: var(--atlas-virtual-row-height); box-sizing: border-box; padding: 4px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.atlas-virtual-grid .atlas-virtual-spacer td { padding: 0; border: 0; font-size: 0; line-height: 0; }
+@media(max-width:480px) { .atlas-calendar td > button { min-height: 58px; padding: 5px 3px; } .atlas-calendar small { font-size: 9px; } }

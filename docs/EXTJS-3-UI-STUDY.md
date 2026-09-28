@@ -84,9 +84,13 @@ Extend the existing table with grouping and summaries. Add grouped header suppor
 
 Add popup/context menus, split buttons, toolbar overflow and item selector. Demonstrate warehouse assignment, price-list maintenance and record actions. Drag/drop must have equivalent buttons/keyboard operations. Reuse permission-aware command definitions across placements.
 
-### Batch 4: richer optional examples
+### Batch 4: analytics and dashboards (implemented)
 
-Evaluate pivot/chart integration, calendar, dashboard rearrangement, rich-text editing and virtualized large grids individually. These have their own data, performance and accessibility costs and should not delay the common ERP controls.
+Add decimal-safe pivot summaries, small bar/line charts with a data table, drill-down and rearrangeable dashboard panels. The sales example uses bounded local data and explicit aggregation limits.
+
+### Batch 5: planning and editing (implemented)
+
+Add a month calendar with agenda, structured block-based rich-text notes and a fixed-row virtual grid. Delivery plans demonstrate signal forms, retained local drafts and independent task instances; inventory demonstrates 50,000 loaded records with bounded rendering. See [Analytics and planning](ANALYTICS-AND-PLANNING.md) for APIs, keyboard behavior and first-release limits.
 
 ## Acceptance for each addition
 

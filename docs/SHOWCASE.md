@@ -28,3 +28,11 @@ All control examples are available to signed-in users. Links to real CRUD views 
 ## Batch 3: commands and assignment
 
 **Commands & assignment** demonstrates price-list maintenance and warehouse assignment with shared permission-aware commands in toolbar, popup, context-menu and split-button placements. Narrow the task to reveal toolbar overflow. Use the item selector's buttons or Alt+arrow shortcuts, simulate an editing-permission change or failed save, and open two independent tasks to compare retained drafts. See [Commands and selection API](COMMANDS-AND-SELECTION.md).
+
+## Batches 4 and 5
+
+- **Analytics & dashboards:** sales-channel filters, decimal-safe monthly pivots, bar/line charts, order drill-down and panel reorder with keyboard alternatives.
+- **Planning & notes:** month calendar and agenda, explicit scheduling, structured notes, read-only and failed-save states, independent plans and dirty-close integration.
+- **Virtualized inventory:** 50,000 loaded sample rows, search/warehouse filters, sorting, compact/comfortable row heights, keyboard navigation, record inspection and load-error retry.
+
+These examples are included in generated starters. Their data and drafts are local to each task. See [Analytics and planning](ANALYTICS-AND-PLANNING.md) for exported APIs and limits.

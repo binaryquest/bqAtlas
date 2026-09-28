@@ -1,3 +1,8 @@
+import {
+  AnalyticsExamples,
+  PlanningExamples,
+  VirtualInventoryExamples,
+} from "./advanced-examples";
 import { CommandExamples } from "./command-examples";
 import { GroupedExamples } from "./grouped-examples";
 import { HierarchyExamples } from "./hierarchy-examples";
@@ -39,6 +44,9 @@ import { BusinessExamples } from "./business-examples";
     GroupedExamples,
     HierarchyExamples,
     CommandExamples,
+    AnalyticsExamples,
+    PlanningExamples,
+    VirtualInventoryExamples,
   ],
   providers: [PurchaseOrderDemo],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -205,6 +213,15 @@ import { BusinessExamples } from "./business-examples";
           @if (visited().has("commands")) {
             <demo-commands [hidden]="section() !== 'commands'" />
           }
+          @if (visited().has("analytics")) {
+            <demo-analytics [hidden]="section() !== 'analytics'" />
+          }
+          @if (visited().has("planning")) {
+            <demo-planning [hidden]="section() !== 'planning'" />
+          }
+          @if (visited().has("virtual")) {
+            <demo-virtual-inventory [hidden]="section() !== 'virtual'" />
+          }
           @if (section() !== "overview") {
             <details class="example-guide">
               <summary>About this example · API & keyboard</summary>
@@ -242,6 +259,7 @@ import { BusinessExamples } from "./business-examples";
   </section>`,
 })
 export class Showcase {
+  readonly planningDemo = viewChild(PlanningExamples);
   readonly commandsDemo = viewChild(CommandExamples);
   readonly crud = inject(CrudWorkspace);
   readonly store = inject(PurchaseOrderDemo);
@@ -274,6 +292,12 @@ export class Showcase {
     this.sections.find((item) => item.id === this.section()),
   );
   readonly apiNotes: Record<string, string> = {
+    analytics:
+      "AtlasPivotTable, AtlasChart, AtlasDashboard / AtlasDashboardPanel. Panel buttons support keyboard reordering; chart points support Enter/Space and include a data table.",
+    planning:
+      "AtlasCalendar: arrows, Home/End, PageUp/PageDown. AtlasRichText integrates with signal forms and stores structured blocks.",
+    virtual:
+      "AtlasVirtualGrid: fixed-height loaded rows, external filters/sort, arrows/PageUp/PageDown/Home/End and Enter to activate.",
     commands:
       "AtlasPopupMenu, AtlasContextMenu, AtlasMenuButton, AtlasSplitButton, AtlasCommandToolbar and AtlasItemSelector. Menus: Up/Down, Home/End, initial letter, Escape. Selector: Alt+arrows; Ctrl/⌘ or Shift for multiple selection.",
     customer:
@@ -312,6 +336,24 @@ export class Showcase {
 
   readonly sections = [
     { id: "overview", title: "Overview", description: "" },
+    {
+      id: "analytics",
+      title: "Analytics & dashboards",
+      description:
+        "Exact decimal pivots, bar and line charts, order drill-down and rearrangeable panels.",
+    },
+    {
+      id: "planning",
+      title: "Planning & notes",
+      description:
+        "Delivery calendar, structured rich-text notes, signal forms and retained local drafts.",
+    },
+    {
+      id: "virtual",
+      title: "Virtualized inventory",
+      description:
+        "50,000 records, bounded rendering, keyboard navigation and local filtering/sorting.",
+    },
     {
       id: "commands",
       title: "Commands & assignment",
@@ -381,6 +423,15 @@ export class Showcase {
   ];
   constructor() {
     this.task.lifecycle.save = async () => {
+      if (this.planningDemo()?.store.dirty()) {
+        try {
+          await this.planningDemo()!.store.save();
+        } catch (error) {
+          this.select("planning");
+          throw error;
+        }
+      }
+
       if (this.commandsDemo()?.store.dirty()) {
         try {
           await this.commandsDemo()!.store.execute("save");
@@ -408,7 +459,8 @@ export class Showcase {
     };
     effect(() =>
       this.task.dirty.set(
-        this.store.dirty() ||
+        (this.planningDemo()?.store.dirty() ?? false) ||
+          this.store.dirty() ||
           this.customers.dirty() ||
           (this.commandsDemo()?.store.dirty() ?? false),
       ),

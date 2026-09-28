@@ -38,3 +38,7 @@ export * from "./lib/hierarchy";
 export * from "./lib/command-model";
 export * from "./lib/command-menu";
 export * from "./lib/item-selector";
+export * from './lib/analytics';
+export * from './lib/calendar';
+export * from './lib/rich-text';
+export * from './lib/virtual-grid';
