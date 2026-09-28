@@ -87,6 +87,8 @@ public sealed class ${e}Service(${m}DbContext db)
 {
     private static readonly HashSet<string> Fields = [${fields.map(f=>q(f.name)).join(', ')}];
     public Task<PageResult<${e}Dto>> LookupAsync(QueryRequest request, CancellationToken ct) => QueryAsync(request, ct);
+    public Task<${e}Dto?> ResolveLookupAsync(Guid id, CancellationToken ct) => db.${p}.AsNoTracking().Where(c => c.Id == id)
+        .Select(c => new ${e}Dto(c.Id, ${list}, c.ModifiedAt)).SingleOrDefaultAsync(ct);
     public async Task<PageResult<${e}Dto>> QueryAsync(QueryRequest request, CancellationToken ct)
     {
         QueryRules.Validate(request, Fields);

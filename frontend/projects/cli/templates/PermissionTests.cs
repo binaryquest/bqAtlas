@@ -45,7 +45,8 @@ public class PermissionTests
             (HttpMethod.Get, record), (HttpMethod.Post, CrmModule.Resource.Endpoint),
             (HttpMethod.Put, record), (HttpMethod.Delete, record),
             (HttpMethod.Post, CrmModule.Resource.Endpoint + "/query"),
-            (HttpMethod.Post, CrmModule.Resource.Endpoint + "/lookup") })
+            (HttpMethod.Post, CrmModule.Resource.Endpoint + "/lookup"),
+            (HttpMethod.Get, CrmModule.Resource.Endpoint + "/lookup/" + Guid.NewGuid()) })
         {
             using var request = new HttpRequestMessage(method, path);
             using var response = await client.SendAsync(request);

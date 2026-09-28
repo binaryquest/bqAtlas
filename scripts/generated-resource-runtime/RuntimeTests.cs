@@ -155,6 +155,9 @@ public sealed class RuntimeTests(GeneratedFixture fixture) : IClassFixture<Gener
         using var client = await fixture.Login(); var input = Input("CRUD-" + Guid.NewGuid().ToString("N")); var first = await Create(client, input); var url = Path + "/" + first.Data.Id;
         Assert.Equal(input.UnitPrice, first.Data.UnitPrice); Assert.Equal(input.AvailableFrom, first.Data.AvailableFrom); Assert.Equal(input.ReorderLevel, first.Data.ReorderLevel); Assert.Equal(input.Category, first.Data.Category);
         var loaded = (await client.GetFromJsonAsync<RecordResult<ProductDto>>(url))!; Assert.Equal(first.Data, loaded.Data); Assert.Equal(first.Version, loaded.Version);
+        var resolved = (await client.GetFromJsonAsync<ProductDto>(Path + "/lookup/" + first.Data.Id))!;
+        Assert.Equal(first.Data, resolved);
+        Assert.Equal("null", await client.GetStringAsync(Path + "/lookup/" + Guid.NewGuid()));
         Assert.Equal(HttpStatusCode.PreconditionRequired, (await client.PutAsJsonAsync(url, input)).StatusCode);
         using var update = new HttpRequestMessage(HttpMethod.Put, url) { Content = JsonContent.Create(input with { Description = "Changed", UnitPrice = 0.0001m, Active = false }) }; update.Headers.TryAddWithoutValidation("If-Match", '"' + first.Version + '"');
         var response = await client.SendAsync(update); Assert.Equal(HttpStatusCode.OK, response.StatusCode); var second = (await response.Content.ReadFromJsonAsync<RecordResult<ProductDto>>())!; Assert.NotEqual(first.Version, second.Version); Assert.Equal(0.0001m, second.Data.UnitPrice);
