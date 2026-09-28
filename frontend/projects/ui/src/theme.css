@@ -38,6 +38,26 @@
   --atlas-subtle: #292b39;
   --atlas-shadow: 0 22px 60px -18px #0008;
 }
+/* Explicit compact scopes override inherited comfortable/mobile density. */
+[data-density="compact"] {
+  --atlas-control-height: 28px;
+  --atlas-space: 8px;
+  --atlas-field-gap: 4px;
+  --atlas-panel-padding: 10px;
+  --atlas-header-padding: 6px 10px;
+  --atlas-cell-padding: 4px 8px;
+  --atlas-toolbar-padding: 6px 8px;
+  --atlas-item-padding: 6px 8px;
+  --atlas-row-action-size: 20px;
+  --atlas-titlebar-height: 32px;
+  --atlas-taskbar-height: 36px;
+  --atlas-task-height: 26px;
+  --atlas-tree-row-height: 24px;
+  --atlas-tree-row-padding: 2px;
+  --atlas-tree-indent: 14px;
+  --atlas-tree-disclosure-size: 16px;
+  --atlas-radius: 4px;
+}
 [data-density="comfortable"],
 .mobile-workspace {
   --atlas-control-height: 42px;
