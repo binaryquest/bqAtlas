@@ -857,11 +857,12 @@ textarea.atlas-input {
   flex-shrink: 0;
 }
 .atlas-select-shell:has(.atlas-select-clear) .atlas-select-trigger {
-  padding-right: 35px;
+  /* Reserve room between the label and caret for the separate clear button. */
+  gap: 40px;
 }
 .atlas-select-clear {
   position: absolute;
-  right: 26px;
+  inset-inline-end: 26px;
 }
 .atlas-placeholder {
   color: var(--atlas-muted);
