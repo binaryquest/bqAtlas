@@ -36,6 +36,7 @@ public sealed class CrmModule(Action<DbContextOptionsBuilder> database) : IBqAtl
     public void MapEndpoints(IEndpointRouteBuilder endpoints)
     {
         const string path = "/api/v1/crm/customers";
+        endpoints.MapGet(path + "/lookup/{id:guid}", (Guid id, CustomerService service, CancellationToken ct) => ResolveLookup(id, service, ct)).RequirePermission(CrmPermissions.Lookup);
         endpoints.MapPost(path + "/lookup", (QueryRequest query, CustomerService service, CancellationToken ct) => service.LookupAsync(query, ct)).RequirePermission(CrmPermissions.Lookup).VerifyCsrf();
         endpoints.MapPost(path + "/query", (QueryRequest query, CustomerService service, CancellationToken ct) => service.QueryAsync(query, ct)).RequirePermission(CrmPermissions.Read).VerifyCsrf();
         endpoints.MapGet(path + "/{id:guid}", async (Guid id, CustomerService service, HttpContext context, CancellationToken ct) =>
@@ -61,6 +62,11 @@ public sealed class CrmModule(Action<DbContextOptionsBuilder> database) : IBqAtl
             if (!context.Request.Headers.ContainsKey("If-Match")) return Results.Problem(statusCode: 428, title: "If-Match is required.");
             return await service.DeleteAsync(id, context.Request.Headers.IfMatch, ct) ? Results.NoContent() : Results.NotFound();
         }).RequirePermission(CrmPermissions.Delete).RequirePermission(CrmPermissions.Read).VerifyCsrf();
+    }
+    private static async Task<IResult> ResolveLookup(Guid id, CustomerService service, CancellationToken ct)
+    {
+        var record = await service.ResolveLookupAsync(id, ct);
+        return record is null ? Results.Content("null", "application/json") : Results.Json(record);
     }
     private static string Actor(HttpContext context) => Actors.GetId(context.User);
 }

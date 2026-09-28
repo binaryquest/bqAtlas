@@ -70,6 +70,8 @@ type Row = Record<string, unknown>;
 export interface EditorTask {
   resource: string;
   id?: string;
+  relation?: string;
+  defaults?: Row;
 }
 @Injectable({ providedIn: "root" })
 export class CrudWorkspace {
@@ -77,6 +79,27 @@ export class CrudWorkspace {
   private readonly session = inject(AtlasSession);
   private readonly definitions = new Map<string, CrudFeature>();
   readonly revision = signal(0);
+  private readonly returns = new Map<string, (id: string) => Promise<void>>();
+  openRelated(resource: string, origin: string, selected: (id: string) => Promise<void>, id?: string, defaults?: Row) {
+    const feature = this.feature(resource);
+    this.descriptor(resource);
+    if (feature.editorComponent) throw new Error("This custom editor has not registered related-record support.");
+    if (!id && !this.session.has(feature.writePermission)) throw new Error("You cannot create this record.");
+    const relation = crypto.randomUUID();
+    this.returns.set(relation, selected);
+    try {
+      const task = this.workspace.open<EditorTask>({screen: "bqatlas.editor", key: relation,
+        title: id ? feature.title : `New ${feature.title}`, origin, data: {resource, id, relation, defaults}});
+      return {task, cancel: () => this.cancelRelated(relation)};
+    } catch (error) { this.cancelRelated(relation); throw error; }
+  }
+  cancelRelated(id: string) { this.returns.delete(id); }
+  async returnRelated(relation: string, id: string) {
+    const callback = this.returns.get(relation);
+    if (!callback) throw new Error("The originating field is no longer available. The record remains saved.");
+    await callback(id);
+    this.returns.delete(relation);
+  }
   constructor() {
     this.workspace.register(
       {
@@ -316,7 +339,11 @@ export class CrudList {
       >
         Reload
       </button>
-      @if (id && canDelete()) {
+      @if (task.data().relation) {
+        <button atlasButton variant="primary" [disabled]="loading() || task.saving() || returning()"
+          (click)="saveAndReturn()">{{ canWrite() ? 'Save & select' : 'Select & return' }}</button>
+      }
+      @if (id && canDelete() && !task.data().relation) {
         <button
           atlasButton
           variant="danger"
@@ -441,14 +468,26 @@ export class CrudEditor {
   );
   readonly canDelete = computed(() => this.session.has(this.feature.deletePermission) && this.draft.capabilities()?.delete !== false);
   private readonly controller = new AbortController();
+  readonly returning = signal(false);
   id = this.task.data().id;
+  async saveAndReturn() {
+    if (this.returning() || this.loading() || this.task.saving()) return;
+    this.returning.set(true);
+    try {
+      if ((!this.id || this.draft.dirty()) && !(await this.save())) return;
+      if (!this.id || this.controller.signal.aborted) return;
+      await this.crud.returnRelated(this.task.data().relation!, this.id);
+      await this.workspace.requestClose(this.task.id);
+    } catch (error) { this.task.error.set(error instanceof Error ? error.message : "Unable to return record."); }
+    finally { this.returning.set(false); }
+  }
   constructor() {
     inject(DestroyRef).onDestroy(() => this.controller.abort());
-    this.task.lifecycle.dispose = () => this.controller.abort();
+    this.task.lifecycle.dispose = () => { this.controller.abort(); const relation = this.task.data().relation; if (relation) this.crud.cancelRelated(relation); };
     this.task.lifecycle.save = () => this.persist();
     effect(() => this.task.dirty.set(this.draft.dirty()));
     if (this.id) void this.load();
-    else this.draft.initialize(this.feature.defaults);
+    else this.draft.initialize({...this.feature.defaults, ...this.task.data().defaults});
   }
   fieldRenderer(name: string): Type<unknown> | null {
     return this.feature.fieldRenderers && Object.hasOwn(this.feature.fieldRenderers, name) ? this.feature.fieldRenderers[name] : null;
@@ -474,7 +513,7 @@ export class CrudEditor {
     )
       return;
     if (this.id) await this.load();
-    else this.draft.initialize(this.feature.defaults);
+    else this.draft.initialize({...this.feature.defaults, ...this.task.data().defaults});
   }
   private async load() {
     this.loading.set(true);
@@ -524,8 +563,8 @@ export class CrudEditor {
         : await this.provider.create(value, this.controller.signal);
       if (this.controller.signal.aborted) return;
       this.id = String(result.data[this.descriptor.keyField]);
-      this.task.data.set({resource:this.descriptor.id,id:this.id});
-      this.workspace.rekey(this.task.id, `${this.descriptor.id}:${this.id}`);
+      this.task.data.update(data => ({...data, id:this.id}));
+      if (!this.task.data().relation) this.workspace.rekey(this.task.id, `${this.descriptor.id}:${this.id}`);
       this.draft.accept(result);
       this.crud.changed();
     } catch (error) {

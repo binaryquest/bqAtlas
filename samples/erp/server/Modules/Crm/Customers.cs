@@ -76,6 +76,8 @@ public sealed class CustomerDirectory(CrmDbContext db) : ICustomerDirectory
 }
 public sealed class CustomerService(CrmDbContext db)
 {
+    public Task<CustomerSummary?> ResolveLookupAsync(Guid id, CancellationToken ct) => db.Customers.AsNoTracking()
+        .Where(c => c.Id == id && c.Active).Select(c => new CustomerSummary(c.Id, c.Code, c.Name, c.Active)).SingleOrDefaultAsync(ct);
     public async Task<PageResult<CustomerSummary>> LookupAsync(QueryRequest request, CancellationToken ct)
     {
         QueryRules.Validate(request, new HashSet<string>());

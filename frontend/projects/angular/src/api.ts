@@ -135,6 +135,9 @@ export class RestResourceProvider<T, TInput = Partial<T>>
 }
 
 export class RestLookupProvider<T> {
+  resolve(id: string, signal?: AbortSignal) {
+    return this.api.request<T | null>(`${this.endpoint}/${encodeURIComponent(id)}`, "GET", undefined, signal);
+  }
   constructor(
     private readonly api: AtlasApi,
     private readonly endpoint: string,

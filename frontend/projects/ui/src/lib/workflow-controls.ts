@@ -344,12 +344,15 @@ export class AtlasDialog {
     const scope = this.host.nativeElement.closest(".atlas-window");
     if (!scope) return;
     const bounds = scope.getBoundingClientRect();
-    const width = Math.max(160, Math.min(520, bounds.width - 24));
+    const viewportWidth = document.documentElement.clientWidth;
+    const viewportHeight = document.documentElement.clientHeight;
+    const width = Math.max(160, Math.min(520, bounds.width - 24, viewportWidth - 24));
     dialog.style.width = `${width}px`;
-    dialog.style.maxHeight = `${Math.max(100, bounds.height - 24)}px`;
+    dialog.style.maxHeight = `${Math.max(100, Math.min(bounds.height, viewportHeight) - 24)}px`;
     dialog.style.margin = "0";
-    dialog.style.left = `${bounds.left + (bounds.width - width) / 2}px`;
-    dialog.style.top = `${bounds.top + Math.max(12, (bounds.height - dialog.getBoundingClientRect().height) / 2)}px`;
+    dialog.style.left = `${Math.max(12, Math.min(bounds.left + (bounds.width - width) / 2, viewportWidth - width - 12))}px`;
+    const height = dialog.getBoundingClientRect().height;
+    dialog.style.top = `${Math.max(12, Math.min(bounds.top + (bounds.height - height) / 2, viewportHeight - height - 12))}px`;
   }
   constructor() {
     effect(() => {

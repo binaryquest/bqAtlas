@@ -40,3 +40,9 @@ These examples are included in generated starters. Their data and drafts are loc
 ## Batch 6
 
 **Feedback & guidance** opens a local inventory import desk with alert/confirm/prompt dialogs, help tooltip/popover, loading mask, determinate/indeterminate progress, cancellation, failure/retry, notices and status. Open independent imports to compare isolated state. See [Feedback and guidance](FEEDBACK-AND-GUIDANCE.md).
+
+## Related-record workflow
+
+In the running ERP sample, open **Sales quotes → New quote → Customer**. The lookup offers **Search more…** for a paged picker and **Create Customer…** for the normal customer form. **Save & select** returns the customer to the unsaved quote. The adjacent **Open Customer** button opens the selected customer for permitted viewing/editing. Quote lines remain in the parent draft.
+
+Lookup access does not grant full customer read/write access. Quick name-only creation is intentionally unavailable. See [the relational lookup study and implementation notes](ODOO-RELATIONAL-LOOKUP-STUDY.md) for contracts, lifecycle rules and remaining metadata/scaffolding work.

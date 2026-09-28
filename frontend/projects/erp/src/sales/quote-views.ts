@@ -226,7 +226,7 @@ export class QuoteList {
       <p role="status">Loading quote…</p>
     }
     <form class="quote-form" (ngSubmit)="save()">
-      <fieldset [disabled]="loading() || task.saving() || !canEdit()">
+      <fieldset [disabled]="loading() || task.saving()">
         <div class="quote-header-fields">
           <div class="quote-customer">
             <label [for]="task.id + '-customer'">Customer</label>
@@ -235,13 +235,15 @@ export class QuoteList {
               label="Customer"
               [describedBy]="task.id + '-customer-error'"
               [provider]="customers"
+              resource="crm.customers"
+              [readonly]="!canEdit()"
               [columns]="customerColumns"
               [recordKey]="customerKey"
               [displayWith]="customerLabel"
               [selectedText]="selectedCustomer()"
               [value]="draft.value().customerId || null"
               (recordSelected)="chooseCustomer($event)"
-              [disabled]="loading() || task.saving() || !canEdit()"
+              [disabled]="loading() || task.saving()"
               [required]="true"
               [invalid]="!!errors()['customerId']"
             />
@@ -257,6 +259,7 @@ export class QuoteList {
               atlasInput
               type="date"
               [id]="task.id + '-date'"
+              [disabled]="!canEdit()"
               name="date"
               [attr.aria-invalid]="!!errors()['date']"
               [attr.aria-describedby]="task.id + '-date-error'"
@@ -270,6 +273,7 @@ export class QuoteList {
             <label [for]="task.id + '-currency'">Currency</label
             ><select
               [id]="task.id + '-currency'"
+              [disabled]="!canEdit()"
               name="currency"
               [attr.aria-invalid]="!!errors()['currency']"
               [attr.aria-describedby]="task.id + '-currency-error'"
@@ -326,6 +330,7 @@ export class QuoteList {
                       atlasInput
                       data-sheet-editor
                       [id]="task.id + '-' + line.id + '-description'"
+                      [disabled]="!canEdit()"
                       [name]="'description-' + line.id"
                       [attr.aria-label]="'Line ' + (i + 1) + ' description'"
                       [attr.aria-invalid]="!!lineError(i, 'description')"

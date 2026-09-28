@@ -112,9 +112,17 @@ public class SalesTests(ApiFixture fixture) : IClassFixture<ApiFixture>
         using var lookup = await fixture.Login("lookup@test.local");
         var result = await lookup.PostAsJsonAsync("/api/v1/crm/customers/lookup", new QueryRequest(Search: active.Code, PageSize: 1)); Assert.Equal(HttpStatusCode.OK, result.StatusCode);
         Assert.Equal(active.Id, Assert.Single((await result.Content.ReadFromJsonAsync<PageResult<CustomerSummary>>())!.Items).Id);
+        var resolved = await lookup.GetFromJsonAsync<System.Text.Json.JsonElement>("/api/v1/crm/customers/lookup/" + active.Id);
+        Assert.Equal(active.Id, resolved.GetProperty("id").GetGuid());
+        Assert.Equal(new[] { "active", "code", "id", "name" }, resolved.EnumerateObject().Select(p => p.Name).OrderBy(n => n).ToArray());
+        Assert.Equal(HttpStatusCode.Forbidden, (await lookup.GetAsync("/api/v1/crm/customers/" + active.Id)).StatusCode);
+        Assert.Equal("null", await lookup.GetStringAsync("/api/v1/crm/customers/lookup/" + inactive.Id));
+        Assert.Equal("null", await lookup.GetStringAsync("/api/v1/crm/customers/lookup/" + Guid.NewGuid()));
+
         Assert.Equal(HttpStatusCode.Forbidden, (await lookup.PostAsJsonAsync("/api/v1/crm/customers/query", new QueryRequest())).StatusCode);
         result = await lookup.PostAsJsonAsync("/api/v1/crm/customers/lookup", new QueryRequest(Search: inactive.Code)); Assert.Empty((await result.Content.ReadFromJsonAsync<PageResult<CustomerSummary>>())!.Items);
         Assert.Equal(HttpStatusCode.BadRequest, (await writer.PostAsJsonAsync(Path, Input(inactive.Id))).StatusCode);
         using var denied = await fixture.Login("denied@test.local"); Assert.Equal(HttpStatusCode.Forbidden, (await denied.PostAsJsonAsync("/api/v1/crm/customers/lookup", new QueryRequest())).StatusCode);
+        Assert.Equal(HttpStatusCode.Forbidden, (await denied.GetAsync("/api/v1/crm/customers/lookup/" + active.Id)).StatusCode);
     }
 }

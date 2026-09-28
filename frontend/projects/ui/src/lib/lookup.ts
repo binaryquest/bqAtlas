@@ -156,6 +156,13 @@ import {
           </div>
         }
       </div>
+      @if (actions().length) {
+        <div class="atlas-select-help" aria-label="Record actions">
+          @for (action of actions(); track action.id) {
+            <button type="button" class="atlas-button" (click)="runAction(action.id)">{{action.label}}</button>
+          }
+        </div>
+      }
       @if(remote()) {
         <div class="atlas-select-help">
           <button type="button" tabindex="-1" [disabled]="loading() || page()===0" (click)="pageChange.emit(page()-1)" aria-label="Previous lookup page" aria-keyshortcuts="PageUp">Previous</button>
@@ -177,6 +184,9 @@ import {
 export class AtlasLookup<T, V extends string | number = string>
   implements FormValueControl<V | null>, OnDestroy
 {
+  readonly actions = input<readonly {id: string; label: string}[]>([]);
+  readonly action = output<{id: string; query: string}>();
+  runAction(id: string) { const query = this.query(); this.close(false); this.action.emit({id, query}); }
   readonly controlId = input.required<string>();
   readonly ariaLabel = input("Record");
   readonly describedBy = input<string>();
@@ -391,6 +401,15 @@ export class AtlasLookup<T, V extends string | number = string>
       this.close(true);
       return;
     }
+    if (event.key === "Tab" && this.actions().length) {
+      const controls = [...this.popup().nativeElement.querySelectorAll<HTMLElement>('input, button:not([disabled]):not([tabindex="-1"])')];
+      const index = controls.indexOf(event.target as HTMLElement);
+      const next = index + (event.shiftKey ? -1 : 1);
+      if (next >= 0 && next < controls.length) { event.preventDefault(); controls[next].focus(); }
+      else this.close(true);
+      return;
+    }
+    if ((event.target as HTMLElement).tagName === 'BUTTON') return;
     if (event.key === "Tab") {
       if (
         this.error() &&

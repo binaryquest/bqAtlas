@@ -89,6 +89,8 @@ export interface ResourceProvider<T, TInput = Partial<T>> {
 }
 
 export interface LookupProvider<T> {
+  /** Minimal eligible projection; unavailable records return null. */
+  resolve?(id: string, signal?: AbortSignal): Promise<T | null>;
   query(request: QueryRequest, signal?: AbortSignal): Promise<PageResult<T>>;
 }
 export * from "./decimal.js";
