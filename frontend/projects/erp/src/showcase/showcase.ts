@@ -1,3 +1,5 @@
+import { GroupedExamples } from "./grouped-examples";
+import { HierarchyExamples } from "./hierarchy-examples";
 import {
   ChangeDetectionStrategy,
   Component,
@@ -32,6 +34,8 @@ import { BusinessExamples } from "./business-examples";
     BusinessExamples,
     CustomerMaintenance,
     LayoutExamples,
+    GroupedExamples,
+    HierarchyExamples,
   ],
   providers: [PurchaseOrderDemo],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -91,7 +95,10 @@ import { BusinessExamples } from "./business-examples";
             }
           }
         </nav>
-        @if (!filtered().length) {<p role="status">No matching examples.</p><button atlasButton (click)="search.set('')">Clear search</button>}
+        @if (!filtered().length) {
+          <p role="status">No matching examples.</p>
+          <button atlasButton (click)="search.set('')">Clear search</button>
+        }
       </aside>
       <div class="example-main">
         <div class="example-tools">
@@ -186,6 +193,12 @@ import { BusinessExamples } from "./business-examples";
           @if (visited().has("layouts")) {
             <demo-layouts [hidden]="section() !== 'layouts'" />
           }
+          @if (visited().has("grouped")) {
+            <demo-grouped-tables [hidden]="section() !== 'grouped'" />
+          }
+          @if (visited().has("hierarchy")) {
+            <demo-hierarchies [hidden]="section() !== 'hierarchy'" />
+          }
           @if (section() !== "overview") {
             <details class="example-guide">
               <summary>About this example · API & keyboard</summary>
@@ -245,7 +258,11 @@ export class Showcase {
         .includes(this.search().trim().toLowerCase()),
     ),
   );
-  readonly filteredSelection = computed(() => this.filtered().some(item => item.id === this.section()) ? this.section() : '');
+  readonly filteredSelection = computed(() =>
+    this.filtered().some((item) => item.id === this.section())
+      ? this.section()
+      : "",
+  );
   readonly activeExample = computed(() =>
     this.sections.find((item) => item.id === this.section()),
   );
@@ -257,6 +274,10 @@ export class Showcase {
     master:
       "AtlasMasterDetail, AtlasEditableGrid, AtlasCommandToolbar, AtlasDialog",
     tables: "AtlasTable, AtlasTree, AtlasListView",
+    grouped:
+      "AtlasTable: groupBy, collapsedGroups, summaries, serverSummary; AtlasColumn.group; atlasSumDecimal and atlasSummaryQueryKey.",
+    hierarchy:
+      "AtlasCheckTree: checkedIds, expandedIds; AtlasTreeGrid: columns, selectedId, expandedIds, loadChildren. Arrows/Home/End navigate; Space selects/checks; Enter retries a failed load.",
     lookup: "AtlasLookup with typed columns and remote query state",
     inputs:
       "AtlasSelect, AtlasMultiSelect, AtlasAutocomplete, AtlasRadioGroup, AtlasCheckboxGroup, AtlasDateInput, AtlasDecimalInput",
@@ -282,6 +303,18 @@ export class Showcase {
 
   readonly sections = [
     { id: "overview", title: "Overview", description: "" },
+    {
+      id: "grouped",
+      title: "Grouped order register",
+      description:
+        "Collapsible groups, grouped headers, exact page and filtered totals; simulated server aggregates and retry.",
+    },
+    {
+      id: "hierarchy",
+      title: "Accounts & assemblies",
+      description:
+        "Tri-state check tree, chart-of-accounts tree grid and lazily loaded bill of materials.",
+    },
     {
       id: "customer",
       title: "Customer maintenance",

@@ -24,7 +24,15 @@ import {
   matchesColumnFilters,
   sortByColumns,
 } from "./table-query";
+import {
+  AtlasSummary,
+  AtlasServerSummary,
+  atlasHeaderBands,
+  atlasGroupRows,
+  atlasSummaryQueryKey,
+} from "./grouping";
 export interface AtlasColumn<T> {
+  group?: string;
   width?: number;
   filterable?: boolean;
   key: keyof T & string;
@@ -198,6 +206,19 @@ export class AtlasRowDetail<T> {
           </colgroup>
         }
         <thead>
+          @if (hasHeaderGroups()) {
+            <tr class="atlas-header-bands">
+              @if (selectable()) {
+                <th></th>
+              }
+              @for (band of headerBands(); track $index) {
+                <th scope="colgroup" [attr.colspan]="band.span">
+                  {{ band.label }}
+                </th>
+              }
+              <th></th>
+            </tr>
+          }
           <tr>
             @if (selectable()) {
               <th class="atlas-checkbox-cell">
@@ -304,87 +325,141 @@ export class AtlasRowDetail<T> {
               </td>
             </tr>
           } @else {
-            @for (row of paged(); track rowKey(row)) {
-              <tr
-                [class.selected]="
-                  selectedKeys().includes(rowKey(row)) ||
-                  selected() === rowKey(row)
-                "
-              >
-                @if (selectable()) {
-                  <td class="atlas-checkbox-cell">
-                    <input
-                      type="checkbox"
-                      [attr.aria-label]="'Select ' + rowKey(row)"
-                      [checked]="selectedKeys().includes(rowKey(row))"
-                      (change)="toggleRow(row)"
-                    />
-                  </td>
-                }
-                @for (column of visibleColumns(); track column.key) {
-                  <td
-                    [style.text-align]="column.align || 'left'"
-                    [class.atlas-pinned]="pinned().includes(column.key)"
-                    [style.left.px]="pinOffset(column.key)"
-                  >
-                    @if (templates().get(column.key); as template) {
-                      <ng-container
-                        [ngTemplateOutlet]="template"
-                        [ngTemplateOutletContext]="{
-                          $implicit: row,
-                          value: row[column.key],
-                        }"
-                      />
-                    } @else if (column.badge) {
-                      <span
-                        class="atlas-badge"
-                        [attr.data-tone]="
-                          column.tone ? column.tone(row) : 'neutral'
-                        "
-                        >{{ value(row, column) }}</span
-                      >
-                    } @else {
-                      {{ value(row, column) }}
-                    }
-                  </td>
-                }
-                <td>
-                  @if (detail(); as detailTemplate) {
-                    <button
-                      type="button"
-                      class="atlas-row-open"
-                      [attr.aria-label]="'Details ' + rowKey(row)"
-                      [attr.aria-expanded]="expanded().includes(rowKey(row))"
-                      (click)="toggleDetail(row)"
-                    >
-                      {{ expanded().includes(rowKey(row)) ? "−" : "+" }}
-                    </button>
-                  }
-                  <button
-                    type="button"
-                    class="atlas-row-open"
-                    [attr.aria-label]="'Open ' + rowKey(row)"
-                    (click)="selected.set(rowKey(row)); rowActivated.emit(row)"
-                  >
-                    <atlas-icon name="arrow" />
-                  </button>
-                </td>
-              </tr>
-              @if (
-                expanded().includes(rowKey(row)) && detail();
-                as detailTemplate
-              ) {
-                <tr>
-                  <td
-                    class="atlas-row-detail"
+            @for (group of pageGroups(); track group.key) {
+              @if (groupBy()) {
+                <tr class="atlas-group-heading">
+                  <th
                     [attr.colspan]="
                       visibleColumns().length + (selectable() ? 2 : 1)
                     "
                   >
-                    <ng-container
-                      [ngTemplateOutlet]="detailTemplate.template"
-                      [ngTemplateOutletContext]="{ $implicit: row }"
-                    />
+                    <button
+                      type="button"
+                      [attr.aria-expanded]="
+                        !collapsedGroups().includes(group.key)
+                      "
+                      (click)="toggleGroup(group.key)"
+                    >
+                      <span aria-hidden="true">{{
+                        collapsedGroups().includes(group.key) ? "▸" : "▾"
+                      }}</span>
+                      {{ group.key || "Unassigned" }}
+                      <span class="atlas-muted"
+                        >· {{ group.rows.length }} on this page</span
+                      >
+                    </button>
+                  </th>
+                </tr>
+              }
+              @if (!groupBy() || !collapsedGroups().includes(group.key)) {
+                @for (row of group.rows; track rowKey(row)) {
+                  <tr
+                    [class.selected]="
+                      selectedKeys().includes(rowKey(row)) ||
+                      selected() === rowKey(row)
+                    "
+                  >
+                    @if (selectable()) {
+                      <td class="atlas-checkbox-cell">
+                        <input
+                          type="checkbox"
+                          [attr.aria-label]="'Select ' + rowKey(row)"
+                          [checked]="selectedKeys().includes(rowKey(row))"
+                          (change)="toggleRow(row)"
+                        />
+                      </td>
+                    }
+                    @for (column of visibleColumns(); track column.key) {
+                      <td
+                        [style.text-align]="column.align || 'left'"
+                        [class.atlas-pinned]="pinned().includes(column.key)"
+                        [style.left.px]="pinOffset(column.key)"
+                      >
+                        @if (templates().get(column.key); as template) {
+                          <ng-container
+                            [ngTemplateOutlet]="template"
+                            [ngTemplateOutletContext]="{
+                              $implicit: row,
+                              value: row[column.key],
+                            }"
+                          />
+                        } @else if (column.badge) {
+                          <span
+                            class="atlas-badge"
+                            [attr.data-tone]="
+                              column.tone ? column.tone(row) : 'neutral'
+                            "
+                            >{{ value(row, column) }}</span
+                          >
+                        } @else {
+                          {{ value(row, column) }}
+                        }
+                      </td>
+                    }
+                    <td>
+                      @if (detail(); as detailTemplate) {
+                        <button
+                          type="button"
+                          class="atlas-row-open"
+                          [attr.aria-label]="'Details ' + rowKey(row)"
+                          [attr.aria-expanded]="
+                            expanded().includes(rowKey(row))
+                          "
+                          (click)="toggleDetail(row)"
+                        >
+                          {{ expanded().includes(rowKey(row)) ? "−" : "+" }}
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="atlas-row-open"
+                        [attr.aria-label]="'Open ' + rowKey(row)"
+                        (click)="
+                          selected.set(rowKey(row)); rowActivated.emit(row)
+                        "
+                      >
+                        <atlas-icon name="arrow" />
+                      </button>
+                    </td>
+                  </tr>
+                  @if (
+                    expanded().includes(rowKey(row)) && detail();
+                    as detailTemplate
+                  ) {
+                    <tr>
+                      <td
+                        class="atlas-row-detail"
+                        [attr.colspan]="
+                          visibleColumns().length + (selectable() ? 2 : 1)
+                        "
+                      >
+                        <ng-container
+                          [ngTemplateOutlet]="detailTemplate.template"
+                          [ngTemplateOutletContext]="{ $implicit: row }"
+                        />
+                      </td>
+                    </tr>
+                  }
+                }
+              }
+              @if (groupBy() && summaries().length) {
+                <tr class="atlas-summary-row">
+                  <td
+                    [attr.colspan]="
+                      visibleColumns().length + (selectable() ? 2 : 1)
+                    "
+                  >
+                    <div class="atlas-summary-values">
+                      <strong
+                        >{{ group.key || "Unassigned" }} · page subtotal</strong
+                      >
+                      @for (summary of summaries(); track summary.key) {
+                        <span
+                          >{{ summary.label }}
+                          <b>{{ summary.aggregate(group.rows) }}</b></span
+                        >
+                      }
+                    </div>
                   </td>
                 </tr>
               }
@@ -402,6 +477,53 @@ export class AtlasRowDetail<T> {
             }
           }
         </tbody>
+        @if (summaries().length && !loading() && !error()) {
+          <tfoot>
+            <tr class="atlas-summary-row">
+              <td
+                [attr.colspan]="
+                  visibleColumns().length + (selectable() ? 2 : 1)
+                "
+              >
+                <div class="atlas-summary-values">
+                  <strong>Page total · {{ paged().length }} records</strong>
+                  @for (summary of summaries(); track summary.key) {
+                    <span
+                      >{{ summary.label }}
+                      <b>{{ summary.aggregate(paged()) }}</b></span
+                    >
+                  }
+                </div>
+                <div class="atlas-summary-values">
+                  <strong>{{
+                    server()
+                      ? "Whole query total · server"
+                      : "Filtered total · all matching records"
+                  }}</strong>
+                  @if (!server()) {
+                    @for (summary of summaries(); track summary.key) {
+                      <span
+                        >{{ summary.label }}
+                        <b>{{ summary.aggregate(filtered()) }}</b></span
+                      >
+                    }
+                  } @else if (acceptedServerSummary(); as remote) {
+                    @for (summary of summaries(); track summary.key) {
+                      <span
+                        >{{ summary.label }}
+                        <b>{{
+                          remote.values[summary.key] ?? "Unavailable"
+                        }}</b></span
+                      >
+                    }
+                  } @else {
+                    <span>Not supplied for this request</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          </tfoot>
+        }
       </table>
     </div>
     <footer class="atlas-table-footer">
@@ -433,6 +555,38 @@ export class AtlasRowDetail<T> {
   </div>`,
 })
 export class AtlasTable<T extends object> {
+  readonly groupBy = input<(keyof T & string) | null>(null);
+  readonly summaries = input<readonly AtlasSummary<T>[]>([]);
+  readonly serverSummary = input<AtlasServerSummary | null>(null);
+  readonly collapsedGroups = model<string[]>([]);
+  readonly hasHeaderGroups = computed(() =>
+    this.visibleColumns().some((column) => !!column.group),
+  );
+  readonly headerBands = computed(() =>
+    atlasHeaderBands(this.visibleColumns()),
+  );
+  readonly pageGroups = computed(() => {
+    const key = this.groupBy();
+    return key
+      ? atlasGroupRows(this.paged(), (row) => String(row[key] ?? ""))
+      : this.paged().length
+        ? [{ key: "", rows: this.paged() }]
+        : [];
+  });
+  readonly acceptedServerSummary = computed(() => {
+    const summary = this.serverSummary();
+    return summary?.scope === "query" &&
+      summary.queryKey === atlasSummaryQueryKey(this.request())
+      ? summary
+      : null;
+  });
+  toggleGroup(key: string) {
+    this.collapsedGroups.update((keys) =>
+      keys.includes(key)
+        ? keys.filter((value) => value !== key)
+        : [...keys, key],
+    );
+  }
   rows = input.required<T[]>();
   columns = input.required<AtlasColumn<T>[]>();
   keyField = input.required<keyof T>();

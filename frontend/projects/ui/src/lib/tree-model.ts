@@ -3,6 +3,12 @@ export interface AtlasTreeNode {
   label: string;
   description?: string;
   disabled?: boolean;
+  /** True for a branch whose children may not have loaded yet. undefined children means unloaded. */
+  hasChildren?: boolean;
+  loading?: boolean;
+  error?: string;
+  /** Optional display values for AtlasTreeGrid columns. */
+  values?: Readonly<Record<string, string | number>>;
   children?: readonly AtlasTreeNode[];
 }
 export interface AtlasTreeRow {
@@ -35,7 +41,8 @@ export function flattenTree(
     const shown = siblings.filter(matches);
     shown.forEach((node, index) => {
       const open =
-        !!node.children?.length && (!!term || expanded.includes(node.id));
+        (!!node.children?.length || !!node.hasChildren) &&
+        (!!term || expanded.includes(node.id));
       result.push({
         node,
         level,
@@ -44,7 +51,7 @@ export function flattenTree(
         size: shown.length,
         expanded: open,
       });
-      if (open) visit(node.children!, level + 1, node.id);
+      if (open) visit(node.children ?? [], level + 1, node.id);
     });
   };
   visit(nodes, 1, null);

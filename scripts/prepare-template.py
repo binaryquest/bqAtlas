@@ -29,7 +29,7 @@ for name in ['ng-packagr','@tailwindcss/postcss','tailwindcss','postcss','pretti
 js('client/package.json',p)
 put('client/tests/draft.test.mjs',"import '@angular/compiler';\nimport {test} from 'node:test';\nimport assert from 'node:assert/strict';\nimport {RecordDraft} from '@bqatlas/angular';\ntest('independent drafts preserve saved records',()=>{const a=new RecordDraft(),b=new RecordDraft();const data={name:'Original'};a.accept({data,version:'1'});b.accept({data,version:'1'});a.change('name','Edited');assert.equal(b.value().name,'Original');a.revert();assert.equal(a.value().name,'Original');});\n")
 put('client/tests/quote.test.mjs',(root/'frontend/tests/quote.test.mjs').read_text().replace("../projects/contracts/dist/index.js","@bqatlas/contracts").replace("../dist/angular/fesm2022/bqatlas-angular.mjs","@bqatlas/angular"))
-for test_name in ['fields','menus','workspace-exit','navigation','password-change','account-recovery','framework','layouts']:
+for test_name in ['fields','menus','workspace-exit','navigation','password-change','account-recovery','framework','layouts','hierarchies']:
  source=(root/f'frontend/tests/{test_name}.test.mjs').read_text().replace('../dist/angular/fesm2022/bqatlas-angular.mjs','@bqatlas/angular').replace('../dist/ui/fesm2022/bqatlas-ui.mjs','@bqatlas/ui')
  put(f'client/tests/{test_name}.test.mjs',source)
 for name in ['Directory.Build.props','Directory.Packages.props','global.json','dotnet-tools.json','.gitignore','LICENSE']:put(name,(root/name).read_text())

@@ -76,7 +76,7 @@ Evolve the existing showcase into an example browser inside one workspace task:
 
 Add tabs, fieldsets/accordion and split panes, then extend panel/toolbars with consistent sections. Build a customer-maintenance example: navigation tree + customer list + tabbed details/contacts/history + linked validation. Include responsive behavior, keyboard focus and retained unsaved state. This creates the structure needed by subsequent examples.
 
-### Batch 2: ERP grids and hierarchy
+### Batch 2: ERP grids and hierarchy (implemented)
 
 Extend the existing table with grouping and summaries. Add grouped header support, check tree and tree grid. Demonstrate an order register grouped by customer/status, a chart of accounts, and a bill-of-materials hierarchy. Use decimal-safe totals and explicit server-total contracts; do not sum a page and label it a dataset total.
 

@@ -31,3 +31,6 @@ export * from './lib/filter-builder';
 export * from './lib/upload-queue';
 
 export * from './lib/layout-controls';
+
+export * from "./lib/grouping";
+export * from "./lib/hierarchy";

@@ -18,3 +18,9 @@ Sample values are held in memory and reset when the showcase window closes. They
 Run the main sample, sign in, then select **Explore forms & controls** on the home screen or **Forms & controls** in the Start menu. Both launch the same singleton workspace window. The showcase is also included in newly generated starters.
 
 All control examples are available to signed-in users. Links to real CRUD views remain filtered by the account's permissions. Purchase-order edits use the workspace's normal save/discard/cancel flow.
+
+## Batch 2: grouped collections and hierarchy
+
+- **Grouped order register**: customer/status grouping, collapse, header bands, exact USD summaries, local filters and simulated server paging with failure/retry. The page and whole-query totals are labelled separately.
+- **Accounts & assemblies**: tri-state account selection, locked accounts, account-balance tree grid, and a bill of materials with delayed child loading and retry. Read-only and reset controls demonstrate state behavior.
+- See [Grouped collections API](GROUPED-COLLECTIONS.md) for selection rules, request identity and adapter responsibilities.
