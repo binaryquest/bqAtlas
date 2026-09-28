@@ -2315,3 +2315,30 @@ button.atlas-start-profile:hover, button.atlas-start-profile:focus-visible { bac
 @media (max-width: 400px) {
   .atlas-workspace > .atlas-dialog .atlas-dialog-actions > button { flex: 1 1 100%; }
 }
+
+/* Composable layout controls. Hidden content remains mounted to retain drafts. */
+.atlas-tabs,.atlas-fieldset-host,.atlas-accordion-section,.atlas-split-pane {display:block;min-width:0;}
+.atlas-tabs [hidden],.atlas-fieldset [hidden],.atlas-accordion-section [hidden],.atlas-split-pane [hidden] {display:none!important;}
+.atlas-tab-strip {display:flex;overflow-x:auto;border-bottom:1px solid var(--atlas-border);gap:2px;background:var(--atlas-subtle);}
+.atlas-tab-strip button {font:inherit;white-space:nowrap;min-height:var(--atlas-control-height);padding:var(--atlas-item-padding);border:0;border-bottom:2px solid transparent;background:transparent;color:var(--atlas-muted);cursor:pointer;}
+.atlas-tab-strip button[aria-selected=true] {border-bottom-color:var(--atlas-accent);color:var(--atlas-accent);background:var(--atlas-surface);font-weight:600;}
+.atlas-tab-strip button:disabled {opacity:.5;cursor:default;}
+.atlas-tab-strip button:focus-visible,.atlas-accordion-heading button:focus-visible,.atlas-fieldset legend button:focus-visible {outline:2px solid var(--atlas-accent);outline-offset:-2px;}
+.atlas-tab-body {padding:var(--atlas-panel-padding);min-width:0;}
+.atlas-tab-body:focus-visible {outline:2px solid var(--atlas-accent);outline-offset:-2px;}
+.atlas-fieldset {min-width:0;margin:0 0 var(--atlas-space);padding:var(--atlas-panel-padding);border:1px solid var(--atlas-border);border-radius:var(--atlas-radius);}
+.atlas-fieldset legend {padding:0 6px;font-weight:600;font-size:12px;color:var(--atlas-text);}
+.atlas-fieldset legend button {min-height:var(--atlas-control-height);font:inherit;font-weight:inherit;background:none;border:0;color:inherit;cursor:pointer;}
+.atlas-accordion-section {border:1px solid var(--atlas-border);border-radius:var(--atlas-radius);overflow:hidden;margin-bottom:var(--atlas-space);}
+.atlas-accordion-heading {margin:0;font-size:13px;}
+.atlas-accordion-heading button {width:100%;display:flex;align-items:center;justify-content:space-between;min-height:var(--atlas-control-height);padding:var(--atlas-header-padding);background:var(--atlas-subtle);border:0;color:var(--atlas-text);font:inherit;font-weight:600;text-align:left;cursor:pointer;}
+.atlas-accordion-body {padding:var(--atlas-panel-padding);}
+.atlas-split-controls {display:flex;justify-content:flex-start;margin-bottom:var(--atlas-space);}
+.atlas-split-grid {display:grid;align-items:stretch;min-width:0;}
+.atlas-split-primary,.atlas-split-secondary {min-width:0;}
+.atlas-splitter {cursor:col-resize;touch-action:none;background:linear-gradient(90deg,transparent 4px,var(--atlas-border) 4px,var(--atlas-border) 6px,transparent 6px);min-height:80px;}
+.atlas-splitter:hover,.atlas-splitter:focus-visible {background:var(--atlas-accent-soft);outline:2px solid var(--atlas-accent);outline-offset:-2px;}
+.atlas-split-pane.is-stacked .atlas-split-grid {gap:var(--atlas-space);}
+.atlas-panel-toolbar:empty,.atlas-panel-footer:empty {display:none;}
+.atlas-panel-toolbar {border-bottom:1px solid var(--atlas-border);padding:var(--atlas-toolbar-padding);}
+.atlas-panel-footer {border-top:1px solid var(--atlas-border);padding:var(--atlas-toolbar-padding);background:var(--atlas-subtle);font-size:12px;color:var(--atlas-muted);}

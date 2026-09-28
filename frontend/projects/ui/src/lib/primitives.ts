@@ -98,7 +98,9 @@ export class AtlasBadge {
         <ng-content select="[panelActions]" />
       </header>
     }
-    <div class="atlas-panel-body"><ng-content /></div>`,
+    <div class="atlas-panel-toolbar"><ng-content select="[panelToolbar]" /></div>
+    <div class="atlas-panel-body"><ng-content /></div>
+    <footer class="atlas-panel-footer"><ng-content select="[panelFooter]" /></footer>`,
 })
 export class AtlasPanel {
   title = input("");

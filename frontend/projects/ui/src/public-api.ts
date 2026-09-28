@@ -29,3 +29,5 @@ export * from "./lib/record-navigation";
 export * from './lib/business-panels';
 export * from './lib/filter-builder';
 export * from './lib/upload-queue';
+
+export * from './lib/layout-controls';

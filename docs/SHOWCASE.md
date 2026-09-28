@@ -1,10 +1,11 @@
 # Forms and controls showcase
 
-Source: `frontend/projects/erp/src/showcase/`. The samples use the existing Atlas controls; they are not new business modules. The sample window retains each section while navigating between examples. Purchase-order edits participate in the workspace dirty/save lifecycle.
+Source: `frontend/projects/erp/src/showcase/`. The samples use the existing Atlas controls; they are not new business modules. The searchable example browser creates demos on first visit and retains them while navigating between examples. It includes density/narrow-preview settings and per-example API/keyboard notes. Purchase-order edits participate in the workspace dirty/save lifecycle.
 
+- Customer maintenance: navigation tree, searchable list, resizable panes, retained customer drafts, details/contacts/history tabs, linked validation, local save/failure/retry and read-only/reset states.
+- Layout workbench: reusable tabs, fieldsets/accordion, split panes and panel slots; see [LAYOUT-CONTROLS.md](LAYOUT-CONTROLS.md).
 - Master / child: purchase-order master list, header, editable child lines, local save and simulated save failure.
 - CRUD forms: permission-filtered links to the actual Customer and Sales quote views; those views use the real backend.
-- Form layouts: supplier onboarding, collapsible accordions, grouped fields and a live summary.
 - Multi-column lookup: code/name/city/balance, search, keyboard selection and disabled archived records.
 - Selection & inputs: multiselect, autocomplete, checkbox/radio groups, toggle, date/date range, decimal input and validation.
 - Advanced tables: 48 sample rows, filtering, multiple sort levels, paging, selection, column visibility/reorder/resize/pinning, expandable details and simulated async queries; plus tree and list controls.
