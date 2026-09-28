@@ -7,6 +7,7 @@ import {
   effect,
   untracked,
   DestroyRef,
+  viewChildren,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import {
@@ -183,7 +184,7 @@ const columns: Record<string, AtlasColumn<CrmRow>[]> = {
       </div>
     }
     @if (resource === "engagement.opportunities") {
-      <atlas-tabs label="Pipeline views"
+      <atlas-tabs label="Pipeline views" [(selected)]="pipelineView"
         ><ng-template atlasTab="board" label="Pipeline board"
           ><div class="crm-board-tools">
             <input
@@ -241,22 +242,25 @@ const columns: Record<string, AtlasColumn<CrmRow>[]> = {
             }
           </div></ng-template
         >
-        <ng-template atlasTab="list" label="All opportunities"
-          ><atlas-table
-            [rows]="rows()"
-            [columns]="tableColumns"
-            keyField="id"
-            label="opportunities"
-            [server]="true"
-            [total]="total()"
-            [pageSize]="25"
-            [loading]="loading()"
-            [error]="error()"
-            [filterable]="true"
-            [columnToggle]="true"
-            (queryChange)="query($event)"
-            (rowActivated)="edit($event)"
-            (retry)="reload()" /></ng-template
+        <ng-template atlasTab="list" label="All opportunities">
+          @if (pipelineView() === "list") {
+            <atlas-table
+              [rows]="rows()"
+              [columns]="tableColumns"
+              keyField="id"
+              label="opportunities"
+              [server]="true"
+              [total]="total()"
+              [pageSize]="25"
+              [loading]="loading()"
+              [error]="error()"
+              [filterable]="true"
+              [columnToggle]="true"
+              (queryChange)="query($event)"
+              (rowActivated)="edit($event)"
+              (retry)="reload()"
+            />
+          }</ng-template
       ></atlas-tabs>
     } @else if (resource === "crm.customers") {
       <atlas-split-pane
@@ -444,12 +448,20 @@ export class CrmWorkbench {
   private readonly latest = new AtlasLatestRequest();
   private timer?: ReturnType<typeof setTimeout>;
   request: QueryRequest = { page: 0, pageSize: 25, search: "" };
+  readonly pipelineView = signal("board");
+  readonly tables = viewChildren(AtlasTable);
+  private previousContext = "";
   constructor() {
     effect(() => {
       this.crud.revision();
-      this.customerFilter();
+      const context =
+        (this.customerFilter()?.id || "") + ":" + this.pipelineView();
       untracked(() => {
-        this.request = { ...this.request, page: 0 };
+        if (context !== this.previousContext) {
+          this.previousContext = context;
+          this.request = { ...this.request, page: 0 };
+          for (const table of this.tables()) table.page.set(0);
+        }
         void this.reload();
       });
     });

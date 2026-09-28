@@ -6,7 +6,7 @@ export const controlDocs = [
     imports: "AtlasButton",
     description:
       "Actions with consistent primary, secondary, ghost and danger treatments.",
-    setup: "count = signal(0);",
+    setup: "count = signal(0);\nincrement = (value: number) => value + 1;",
     template:
       '<button atlasButton variant="primary" type="button" (click)="count.update(increment)">Save</button>',
     api: "variant: primary | secondary | ghost | danger. Native disabled, type and click retain their normal behavior. Define increment = (n: number) => n + 1 in the component.",
@@ -106,7 +106,7 @@ export const controlDocs = [
     description:
       "A visible single choice for short lists such as activity type.",
     setup:
-      "kind = signal('Call');\noptions = [{value:'Call',label:'Call'}, {value:'Meeting',label:'Meeting'}];",
+      "kind = signal<string | null>('Call');\noptions = [{value:'Call',label:'Call'}, {value:'Meeting',label:'Meeting'}];",
     template:
       '<atlas-radio-group controlId="kind" label="Activity type" [options]="options" [(value)]="kind" />',
     api: "value / valueChange: string | null; options, label and controlId; disabled and readonly; invalid is announced when touched.",
