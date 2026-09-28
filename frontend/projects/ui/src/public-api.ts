@@ -34,3 +34,7 @@ export * from './lib/layout-controls';
 
 export * from "./lib/grouping";
 export * from "./lib/hierarchy";
+
+export * from "./lib/command-model";
+export * from "./lib/command-menu";
+export * from "./lib/item-selector";

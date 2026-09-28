@@ -80,7 +80,7 @@ Add tabs, fieldsets/accordion and split panes, then extend panel/toolbars with c
 
 Extend the existing table with grouping and summaries. Add grouped header support, check tree and tree grid. Demonstrate an order register grouped by customer/status, a chart of accounts, and a bill-of-materials hierarchy. Use decimal-safe totals and explicit server-total contracts; do not sum a page and label it a dataset total.
 
-### Batch 3: commands and selection
+### Batch 3: commands and selection (implemented)
 
 Add popup/context menus, split buttons, toolbar overflow and item selector. Demonstrate warehouse assignment, price-list maintenance and record actions. Drag/drop must have equivalent buttons/keyboard operations. Reuse permission-aware command definitions across placements.
 

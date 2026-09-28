@@ -1,3 +1,4 @@
+import { CommandExamples } from "./command-examples";
 import { GroupedExamples } from "./grouped-examples";
 import { HierarchyExamples } from "./hierarchy-examples";
 import {
@@ -8,6 +9,7 @@ import {
   effect,
   inject,
   signal,
+  viewChild,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { ATLAS_TASK, AtlasButton, AtlasInput } from "@bqatlas/ui";
@@ -36,6 +38,7 @@ import { BusinessExamples } from "./business-examples";
     LayoutExamples,
     GroupedExamples,
     HierarchyExamples,
+    CommandExamples,
   ],
   providers: [PurchaseOrderDemo],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -199,6 +202,9 @@ import { BusinessExamples } from "./business-examples";
           @if (visited().has("hierarchy")) {
             <demo-hierarchies [hidden]="section() !== 'hierarchy'" />
           }
+          @if (visited().has("commands")) {
+            <demo-commands [hidden]="section() !== 'commands'" />
+          }
           @if (section() !== "overview") {
             <details class="example-guide">
               <summary>About this example · API & keyboard</summary>
@@ -236,6 +242,7 @@ import { BusinessExamples } from "./business-examples";
   </section>`,
 })
 export class Showcase {
+  readonly commandsDemo = viewChild(CommandExamples);
   readonly crud = inject(CrudWorkspace);
   readonly store = inject(PurchaseOrderDemo);
   readonly task = inject(ATLAS_TASK);
@@ -267,6 +274,8 @@ export class Showcase {
     this.sections.find((item) => item.id === this.section()),
   );
   readonly apiNotes: Record<string, string> = {
+    commands:
+      "AtlasPopupMenu, AtlasContextMenu, AtlasMenuButton, AtlasSplitButton, AtlasCommandToolbar and AtlasItemSelector. Menus: Up/Down, Home/End, initial letter, Escape. Selector: Alt+arrows; Ctrl/⌘ or Shift for multiple selection.",
     customer:
       "AtlasSplitPane, AtlasPanel, AtlasTree, AtlasTabs / AtlasTab, AtlasFieldset, AtlasAccordionSection, AtlasCommandToolbar",
     layouts:
@@ -303,6 +312,12 @@ export class Showcase {
 
   readonly sections = [
     { id: "overview", title: "Overview", description: "" },
+    {
+      id: "commands",
+      title: "Commands & assignment",
+      description:
+        "Permission-aware menus, split buttons, responsive toolbar overflow and warehouse item selection with retained price-list drafts.",
+    },
     {
       id: "grouped",
       title: "Grouped order register",
@@ -366,6 +381,14 @@ export class Showcase {
   ];
   constructor() {
     this.task.lifecycle.save = async () => {
+      if (this.commandsDemo()?.store.dirty()) {
+        try {
+          await this.commandsDemo()!.store.execute("save");
+        } catch (error) {
+          this.select("commands");
+          throw error;
+        }
+      }
       if (this.customers.dirty()) {
         try {
           await this.customers.save();
@@ -384,7 +407,11 @@ export class Showcase {
       }
     };
     effect(() =>
-      this.task.dirty.set(this.store.dirty() || this.customers.dirty()),
+      this.task.dirty.set(
+        this.store.dirty() ||
+          this.customers.dirty() ||
+          (this.commandsDemo()?.store.dirty() ?? false),
+      ),
     );
   }
 }

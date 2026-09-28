@@ -24,3 +24,7 @@ All control examples are available to signed-in users. Links to real CRUD views 
 - **Grouped order register**: customer/status grouping, collapse, header bands, exact USD summaries, local filters and simulated server paging with failure/retry. The page and whole-query totals are labelled separately.
 - **Accounts & assemblies**: tri-state account selection, locked accounts, account-balance tree grid, and a bill of materials with delayed child loading and retry. Read-only and reset controls demonstrate state behavior.
 - See [Grouped collections API](GROUPED-COLLECTIONS.md) for selection rules, request identity and adapter responsibilities.
+
+## Batch 3: commands and assignment
+
+**Commands & assignment** demonstrates price-list maintenance and warehouse assignment with shared permission-aware commands in toolbar, popup, context-menu and split-button placements. Narrow the task to reveal toolbar overflow. Use the item selector's buttons or Alt+arrow shortcuts, simulate an editing-permission change or failed save, and open two independent tasks to compare retained drafts. See [Commands and selection API](COMMANDS-AND-SELECTION.md).

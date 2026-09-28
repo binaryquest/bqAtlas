@@ -14,81 +14,202 @@ import {
   viewChild,
 } from "@angular/core";
 import { AtlasButton, AtlasIcon } from "./primitives";
-export interface AtlasCommand {
-  id: string;
-  label: string;
-  icon?: string;
-  primary?: boolean;
-  disabled?: boolean;
-  group?: string;
-}
+import {
+  AtlasCommand,
+  atlasVisibleCommands,
+  atlasCommandAllowed,
+  atlasToolbarCapacity,
+} from "./command-model";
+import { AtlasPopupMenu } from "./command-menu";
+export type { AtlasCommand } from "./command-model";
 @Component({
   selector: "atlas-command-toolbar",
-  imports: [AtlasButton, AtlasIcon],
+  imports: [AtlasButton, AtlasIcon, AtlasPopupMenu],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<div
-    class="atlas-command-toolbar"
-    role="toolbar"
-    [attr.aria-label]="label()"
-  >
-    @for (command of commands(); track command.id) {
-      <button
-        atlasButton
-        type="button"
-        [variant]="command.primary ? 'primary' : 'secondary'"
-        [disabled]="disabled() || command.disabled"
-        [attr.tabindex]="tabstop() === command.id ? 0 : -1"
-        [class.atlas-command-group-start]="
-          $index > 0 && command.group !== commands()[$index - 1].group
-        "
-        (focus)="focused.set(command.id)"
-        (keydown)="key($event, command.id)"
-        (click)="execute(command)"
-      >
-        @if (command.icon) {
-          <atlas-icon [name]="command.icon!" />
-        }
-        {{ command.label }}
-      </button>
-    }
-    <span class="atlas-command-status" role="status"><ng-content /></span>
-  </div>`,
+      #bar
+      class="atlas-command-toolbar"
+      role="toolbar"
+      [attr.aria-label]="label()"
+    >
+      @for (item of visible(); track item.id) {
+        <button
+          atlasButton
+          type="button"
+          [variant]="item.primary ? 'primary' : 'secondary'"
+          [disabled]="disabled() || item.disabled"
+          [class.atlas-command-group-start]="
+            $index > 0 && item.group !== visible()[$index - 1].group
+          "
+          [attr.tabindex]="tabstop() === item.id ? 0 : -1"
+          (focus)="focused.set(item.id)"
+          (keydown)="key($event)"
+          (click)="execute(item)"
+        >
+          @if (item.icon) {
+            <atlas-icon [name]="item.icon" />
+          }
+          {{ item.label }}
+        </button>
+      }
+      @if (overflow().length) {
+        <button
+          #more
+          atlasButton
+          type="button"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="menu.opened()"
+          [disabled]="disabled()"
+          [attr.tabindex]="tabstop() === '__more' ? 0 : -1"
+          (focus)="focused.set('__more')"
+          (keydown)="key($event)"
+          (keydown.arrowdown)="$event.preventDefault(); menu.openAt(more)"
+          (click)="menu.openAt(more)"
+        >
+          More ▾
+        </button>
+      }
+      <span #status class="atlas-command-status" role="status"
+        ><ng-content
+      /></span>
+      <atlas-popup-menu
+        #menu
+        [commands]="overflow()"
+        [permissions]="permissions()"
+        [disabled]="disabled()"
+        [label]="label() + ' overflow'"
+        (command)="executeId($event)"
+      />
+    </div>
+    <div #measure class="atlas-toolbar-measure" aria-hidden="true" inert>
+      @for (item of allowed(); track item.id) {
+        <button
+          atlasButton
+          tabindex="-1"
+          [class.atlas-command-group-start]="
+            $index > 0 && item.group !== allowed()[$index - 1].group
+          "
+          [variant]="item.primary ? 'primary' : 'secondary'"
+        >
+          @if (item.icon) {
+            <atlas-icon [name]="item.icon" />
+          }
+          {{ item.label }}
+        </button>
+      }
+      <button atlasButton tabindex="-1">More ▾</button>
+    </div>`,
 })
 export class AtlasCommandToolbar {
-  readonly commands = input<AtlasCommand[]>([]);
+  readonly commands = input<readonly AtlasCommand[]>([]);
+  readonly permissions = input<readonly string[]>([]);
   readonly label = input("Record actions");
   readonly disabled = input(false);
   readonly command = output<string>();
   readonly focused = signal("");
-  readonly available = computed(() =>
-    this.disabled() ? [] : this.commands().filter((c) => !c.disabled),
+  readonly capacity = signal(Infinity);
+  readonly allowed = computed(() =>
+    atlasVisibleCommands(this.commands(), this.permissions()),
   );
-  readonly tabstop = computed(
-    () =>
-      this.available().find((c) => c.id === this.focused())?.id ??
-      this.available()[0]?.id,
-  );
-  execute(command: AtlasCommand) {
-    if (!this.disabled() && !command.disabled) this.command.emit(command.id);
+  readonly visible = computed(() => this.allowed().slice(0, this.capacity()));
+  readonly overflow = computed(() => this.allowed().slice(this.capacity()));
+  readonly tabstop = computed(() => {
+    const ids = this.visible()
+      .filter((item) => !item.disabled)
+      .map((item) => item.id);
+    if (this.overflow().length) ids.push("__more");
+    return ids.includes(this.focused()) ? this.focused() : ids[0];
+  });
+  private readonly bar = viewChild.required<ElementRef<HTMLElement>>("bar");
+  private readonly measure =
+    viewChild.required<ElementRef<HTMLElement>>("measure");
+  private readonly status =
+    viewChild.required<ElementRef<HTMLElement>>("status");
+  constructor() {
+    const destroy = inject(DestroyRef);
+    afterNextRender(() => {
+      const observer = new ResizeObserver(() => this.resize());
+      observer.observe(this.bar().nativeElement);
+      observer.observe(this.measure().nativeElement);
+      observer.observe(this.status().nativeElement);
+      destroy.onDestroy(() => observer.disconnect());
+      this.resize();
+    });
+    effect((onCleanup) => {
+      this.allowed();
+      const frame = requestAnimationFrame(() => this.resize());
+      onCleanup(() => cancelAnimationFrame(frame));
+    });
   }
-  key(event: KeyboardEvent, id: string) {
+  resize() {
+    const buttons = [
+      ...this.measure().nativeElement.querySelectorAll("button"),
+    ];
+    const more = buttons.pop()?.getBoundingClientRect().width ?? 84;
+    const widths = buttons.map(
+      (button) =>
+        button.getBoundingClientRect().width +
+        parseFloat(getComputedStyle(button).marginLeft) +
+        parseFloat(getComputedStyle(button).marginRight),
+    );
+    const status = this.status().nativeElement;
+    const style = getComputedStyle(this.bar().nativeElement);
+    const padding =
+      parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + 8;
+    const available =
+      this.bar().nativeElement.clientWidth -
+      padding -
+      (status.textContent?.trim()
+        ? status.getBoundingClientRect().width + 8
+        : 0);
+    const capacity = atlasToolbarCapacity(widths, available, more);
+    const active = document.activeElement;
+    const moveFocus =
+      this.bar().nativeElement.contains(active) && capacity !== this.capacity();
+    this.capacity.set(capacity);
+    if (moveFocus) {
+      const bar = this.bar().nativeElement;
+      requestAnimationFrame(() => {
+        if (
+          bar.isConnected &&
+          (document.activeElement === active ||
+            document.activeElement === document.body)
+        )
+          bar.querySelector<HTMLElement>('button[tabindex="0"]')?.focus();
+      });
+    }
+  }
+  execute(item: AtlasCommand) {
+    this.executeId(item.id);
+  }
+  executeId(id: string) {
+    if (
+      atlasCommandAllowed(
+        this.commands(),
+        id,
+        this.permissions(),
+        this.disabled(),
+      )
+    )
+      this.command.emit(id);
+  }
+  key(event: KeyboardEvent) {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
-    const items = this.available(),
-      at = items.findIndex((c) => c.id === id);
+    const buttons = [
+      ...this.bar().nativeElement.querySelectorAll<HTMLButtonElement>(
+        ":scope > button:not(:disabled)",
+      ),
+    ];
+    const at = buttons.indexOf(event.currentTarget as HTMLButtonElement);
     const next =
       event.key === "Home"
         ? 0
         : event.key === "End"
-          ? items.length - 1
-          : (at + (event.key === "ArrowRight" ? 1 : -1) + items.length) %
-            items.length;
-    const buttons = (
-      event.currentTarget as HTMLElement
-    ).parentElement?.querySelectorAll<HTMLButtonElement>(
-      "button:not(:disabled)",
-    );
-    buttons?.[next]?.focus();
+          ? buttons.length - 1
+          : (at + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) %
+            buttons.length;
+    buttons[next]?.focus();
   }
 }
 @Component({

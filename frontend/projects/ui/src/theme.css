@@ -2377,3 +2377,32 @@ button.atlas-start-profile:hover, button.atlas-start-profile:focus-visible { bac
 .atlas-check-tree .atlas-tree-disclosure, .atlas-tree-grid .atlas-tree-disclosure { border: 0; background: transparent; color: inherit; font: inherit; }
 .atlas-check-tree input { flex: 0 0 auto; accent-color: var(--atlas-accent); }
 .atlas-check-tree { max-height: 480px; }
+
+/* Menus use the browser top layer so window panels do not clip them. */
+.atlas-popup-menu { position: fixed; inset: auto; margin: 0; padding: 5px; min-width: 190px; max-width: min(320px, calc(100vw - 16px)); max-height: calc(100vh - 16px); overflow: auto; border: 1px solid var(--atlas-border); border-radius: 7px; color: var(--atlas-text); background: var(--atlas-surface); box-shadow: 0 8px 28px #0003; font: 12px/1.5 var(--atlas-font); }
+.atlas-popup-menu button { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 10px; border: 0; border-radius: 4px; background: transparent; color: inherit; text-align: start; font: inherit; cursor: pointer; }
+.atlas-popup-menu button:hover, .atlas-popup-menu button:focus-visible { outline: none; background: var(--atlas-accent-soft); }
+.atlas-popup-menu button[aria-disabled="true"] { opacity: .45; cursor: default; }
+.atlas-menu-separator { margin: 5px; border-top: 1px solid var(--atlas-border); }
+.atlas-split-button { display: inline-flex; align-items: stretch; gap: 0; }
+.atlas-split-button > button:first-child { border-start-end-radius: 0; border-end-end-radius: 0; }
+.atlas-split-button > button:nth-child(2) { border-start-start-radius: 0; border-end-start-radius: 0; margin-inline-start: -1px; }
+atlas-command-toolbar { position: relative; min-width: 0; }
+.atlas-command-toolbar { flex-wrap: nowrap; min-width: 0; }
+.atlas-command-toolbar > button { flex-shrink: 0; white-space: nowrap; }
+.atlas-command-toolbar .atlas-command-status { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 35%; }
+.atlas-toolbar-measure { position: absolute; visibility: hidden; pointer-events: none; display: flex; width: max-content; height: 0; overflow: hidden; }
+.atlas-toolbar-measure > button { flex-shrink: 0; white-space: nowrap; }
+.atlas-item-selector { min-width: 0; margin: 0; padding: 14px; border: 1px solid var(--atlas-border); border-radius: 6px; }
+.atlas-item-selector legend { padding: 0 6px; font-weight: 600; }
+.atlas-item-selector-grid { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); gap: 12px; }
+.atlas-item-selector-list { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.atlas-item-selector-list > select { min-height: 180px; flex: 1; width: 100%; padding: 4px; border: 1px solid var(--atlas-border); border-radius: 4px; background: var(--atlas-surface); color: var(--atlas-text); font: inherit; }
+.atlas-item-selector-list option { padding: 6px 8px; }
+.atlas-item-selector-actions { display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+.atlas-item-selector-order { display: flex; flex-wrap: wrap; gap: 6px; }
+@container (max-width: 580px) { .atlas-item-selector-grid { grid-template-columns: minmax(0,1fr); } .atlas-item-selector-actions { flex-direction: row; } }
+@media (max-width: 580px) { .atlas-item-selector-grid { grid-template-columns: minmax(0,1fr); } .atlas-item-selector-actions { flex-direction: row; } }
+atlas-item-selector { display: block; container-type: inline-size; }
+atlas-popup-menu { display: contents; }
+.atlas-toolbar-measure .atlas-command-group-start { margin-inline-start: 8px; }
