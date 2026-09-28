@@ -7,6 +7,7 @@ using BqAtlas.Core;
 using BqAtlas.Identity;
 using BqAtlas.Sample.Crm;
 using BqAtlas.Sample.Sales;
+using BqAtlas.Sample.Engagement;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -47,8 +48,9 @@ public sealed class ApiFixture : IAsyncLifetime
         await scope.ServiceProvider.GetRequiredService<CrmDbContext>().Database.MigrateAsync();
         await scope.ServiceProvider.GetRequiredService<AtlasIdentityDbContext>().Database.MigrateAsync();
         await scope.ServiceProvider.GetRequiredService<SalesDbContext>().Database.MigrateAsync();
+        await scope.ServiceProvider.GetRequiredService<EngagementDbContext>().Database.MigrateAsync();
         var users = scope.ServiceProvider.GetRequiredService<UserManager<AtlasUser>>();
-        foreach (var (email, permissions) in new[] { ("writer@test.local", CrmPermissions.All.Concat(SalesPermissions.All).ToArray()), ("reader@test.local", new[] { CrmPermissions.Read, CrmPermissions.Lookup, SalesPermissions.Read }), ("denied@test.local", Array.Empty<string>()), ("editor@test.local", new[] { CrmPermissions.Lookup, SalesPermissions.Read, SalesPermissions.Write }), ("lookup@test.local", new[] { CrmPermissions.Lookup }), ("sales-only@test.local", new[] { SalesPermissions.Read, SalesPermissions.Write }) })
+        foreach (var (email, permissions) in new[] { ("writer@test.local", CrmPermissions.All.Concat(SalesPermissions.All).Concat(EngagementModule.AllPermissions).ToArray()), ("reader@test.local", new[] { CrmPermissions.Read, CrmPermissions.Lookup, SalesPermissions.Read }), ("denied@test.local", Array.Empty<string>()), ("editor@test.local", new[] { CrmPermissions.Lookup, SalesPermissions.Read, SalesPermissions.Write }), ("lookup@test.local", new[] { CrmPermissions.Lookup }), ("sales-only@test.local", new[] { SalesPermissions.Read, SalesPermissions.Write }) })
         {
             var user = new AtlasUser { UserName = email, Email = email, EmailConfirmed = true };
             Assert.True((await users.CreateAsync(user, Password)).Succeeded);

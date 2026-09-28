@@ -35,11 +35,11 @@ for test_name in ['fields','menus','workspace-exit','navigation','password-chang
 for name in ['Directory.Build.props','Directory.Packages.props','global.json','dotnet-tools.json','.gitignore','LICENSE']:put(name,(root/name).read_text())
 p=out/'Directory.Packages.props';s=p.read_text().replace('</ItemGroup>',''.join(f'<PackageVersion Include="BqAtlas.{name}" Version="0.1.0-alpha.1" />\n' for name in ['Core','AspNetCore','Identity','EntityFrameworkCore','OData'])+'</ItemGroup>');p.write_text(s)
 copytree('backend/tests/BqAtlas.Tests','tests/Unit')
-p=out/'tests/Unit/BqAtlas.Tests.csproj';s=p.read_text().replace('../../src/BqAtlas.Core/BqAtlas.Core.csproj','PACKAGE_CORE').replace('../../../samples/erp/server/Modules/Crm/Crm.csproj','../../server/Modules/Crm/Crm.csproj').replace('../../../samples/erp/server/Modules/Sales/Sales.csproj','../../server/Modules/Sales/Sales.csproj').replace('../../../contracts/','../../contracts/').replace('<ProjectReference Include="PACKAGE_CORE" />','<PackageReference Include="BqAtlas.Core" />');p.write_text(s)
+p=out/'tests/Unit/BqAtlas.Tests.csproj';s=p.read_text().replace('../../src/BqAtlas.Core/BqAtlas.Core.csproj','PACKAGE_CORE').replace('../../../samples/erp/server/Modules/Crm/Crm.csproj','../../server/Modules/Crm/Crm.csproj').replace('../../../samples/erp/server/Modules/Sales/Sales.csproj','../../server/Modules/Sales/Sales.csproj').replace('../../../samples/erp/server/Modules/Engagement/Engagement.csproj','../../server/Modules/Engagement/Engagement.csproj').replace('../../../contracts/','../../contracts/').replace('<ProjectReference Include="PACKAGE_CORE" />','<PackageReference Include="BqAtlas.Core" />');p.write_text(s)
 put('BqAtlas.Sample.slnx','<Solution><Project Path="server/Host/Host.csproj"/><Project Path="tests/Unit/BqAtlas.Tests.csproj"/></Solution>\n')
 copytree('scripts/starter','scripts')
 put('scripts/setup-dev.mjs',(root/'scripts/setup-dev.mjs').read_text())
-s=(root/'scripts/backend.mjs').read_text().replace('samples/erp/server/Host','server/Host');s=s.replace("'run','migrate','grant-dev','test:integration'","'run','migrate','grant-dev'");put('scripts/backend.mjs',s)
+s=(root/'scripts/backend.mjs').read_text().replace('samples/erp/server/Host','server/Host');s=s.replace("'run','migrate','grant-dev','seed-crm','test:integration'","'run','migrate','grant-dev','seed-crm'");put('scripts/backend.mjs',s)
 put('compose.yaml',(root/'compose.yaml').read_text())
 # Replace only specific default values with template symbols.
 p=out/'server/Host/appsettings.json';c=json.loads(p.read_text());c['Database']['Provider']='__BQATLAS_DATABASE_PROVIDER__';c['Authentication']['Mode']='__BQATLAS_AUTH_MODE__';js('server/Host/appsettings.json',c)
@@ -54,8 +54,9 @@ To integrate a generated resource, follow the [module-authoring walkthrough](htt
 2. Run `node scripts/setup-dev.mjs`. Open the generated `.env` to see your unique development account credentials.
 3. Run `docker compose --profile postgresql up -d --wait` (or use your SQL Server connection and set `Database__Provider=sqlserver`).
 4. Run `node scripts/backend.mjs migrate`, then `node scripts/backend.mjs run`.
-5. In `client`, run `npm install`, then `npm start`. Open http://127.0.0.1:4200.
-6. Run `dotnet test tests/Unit` and `npm test --prefix client` for unit tests.
+5. Optionally run `node scripts/backend.mjs seed-crm` to add development CRM demo records; this is never run at startup.
+6. In `client`, run `npm install`, then `npm start`. Open http://127.0.0.1:4200.
+7. Run `dotnet test tests/Unit` and `npm test --prefix client` for unit tests.
 
 For the isolated development Keycloak profile, run `node scripts/setup-keycloak.mjs`, `docker compose --profile oidc up -d keycloak`, then `node scripts/backend.mjs run --keycloak`. Use http://127.0.0.1:4200. Generated credentials are in the ignored `.env.keycloak`. Existing realm state and credentials are preserved on repeated setup.
 

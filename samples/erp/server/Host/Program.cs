@@ -3,6 +3,7 @@ using BqAtlas.AspNetCore;
 using BqAtlas.Identity;
 using BqAtlas.Sample.Crm;
 using BqAtlas.Sample.Sales;
+using BqAtlas.Sample.Engagement;
 using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
@@ -21,6 +22,8 @@ registry.AddModule(new CrmModule(options => ConfigureDatabase(options, "crm")));
 registry.AddResource(CrmModule.Resource);
 registry.AddModule(new SalesModule(options => ConfigureDatabase(options, "sales")));
 registry.AddResource(SalesModule.Resource);
+registry.AddModule(new EngagementModule(options => ConfigureDatabase(options, "engagement")));
+foreach(var resource in EngagementModule.Resources) registry.AddResource(resource);
 builder.Services.AddBqAtlasHttp(registry);
 builder.Services.AddExceptionHandler<BqAtlas.Sample.DatabaseConflictHandler>();
 registry.Configure(builder.Services, builder.Configuration);
@@ -55,14 +58,20 @@ if (args.Contains("--migrate"))
     await using var scope = app.Services.CreateAsyncScope();
     await scope.ServiceProvider.GetRequiredService<CrmDbContext>().Database.MigrateAsync();
     await scope.ServiceProvider.GetRequiredService<SalesDbContext>().Database.MigrateAsync();
+    await scope.ServiceProvider.GetRequiredService<EngagementDbContext>().Database.MigrateAsync();
     if (authMode == "local") await scope.ServiceProvider.GetRequiredService<AtlasIdentityDbContext>().Database.MigrateAsync();
     return;
 }
-if (authMode == "local") await app.Services.BootstrapDevelopmentUserAsync(builder.Configuration, app.Environment, CrmPermissions.All.Concat(SalesPermissions.All));
+if (authMode == "local") await app.Services.BootstrapDevelopmentUserAsync(builder.Configuration, app.Environment, CrmPermissions.All.Concat(SalesPermissions.All).Concat(EngagementModule.AllPermissions));
 if (args.Contains("--grant-development-permissions"))
 {
     if (authMode != "local") throw new InvalidOperationException("Development permission grants require local Identity mode.");
-    await app.Services.GrantDevelopmentPermissionsAsync(builder.Configuration, app.Environment, CrmPermissions.All.Concat(SalesPermissions.All));
+    await app.Services.GrantDevelopmentPermissionsAsync(builder.Configuration, app.Environment, CrmPermissions.All.Concat(SalesPermissions.All).Concat(EngagementModule.AllPermissions));
+    return;
+}
+if (args.Contains("--seed-crm-demo"))
+{
+    await BqAtlas.Sample.CrmDemoSeed.Run(app.Services, app.Environment);
     return;
 }
 app.Run();

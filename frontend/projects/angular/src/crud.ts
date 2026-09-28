@@ -179,7 +179,7 @@ export class CrudWorkspace {
       data: { resource },
     });
   }
-  openEditor(resource: string, id?: string, origin?: string) {
+  openEditor(resource: string, id?: string, origin?: string, defaults?: Row) {
     const feature = this.feature(resource);
     this.descriptor(resource);
     if (!id && !this.session.has(feature.writePermission))
@@ -188,7 +188,7 @@ export class CrudWorkspace {
       screen: feature.editorComponent ? resource + ".editor" : "bqatlas.editor",
       key: `${resource}:${id ?? crypto.randomUUID()}`,
       title: id ? feature.title : `New ${feature.title}`,
-      data: { resource, id },
+      data: { resource, id, defaults },
       origin,
     });
   }

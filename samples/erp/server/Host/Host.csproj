@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><IsPackable>false</IsPackable><RootNamespace>BqAtlas.Sample</RootNamespace></PropertyGroup><ItemGroup><ProjectReference Include="../Modules/Sales/Sales.csproj" />
+<Project Sdk="Microsoft.NET.Sdk.Web"><PropertyGroup><IsPackable>false</IsPackable><RootNamespace>BqAtlas.Sample</RootNamespace></PropertyGroup><ItemGroup><ProjectReference Include="../Modules/Engagement/Engagement.csproj"/><ProjectReference Include="../Modules/Sales/Sales.csproj" />
 <ProjectReference Include="../../../../backend/src/BqAtlas.Identity/BqAtlas.Identity.csproj" />
 <ProjectReference Include="../Modules/Crm/Crm.csproj" />
 <ProjectReference Include="../Migrations/PostgreSql/PostgreSql.csproj" />

@@ -383,7 +383,7 @@ h1 {
 .user-account-dialog fieldset label { display: grid; gap: 6px; }
 
 /* Align the showcase launcher with nested application menu cards. */
-.workspace-home > .showcase-launcher {
+.workspace-home .showcase-launcher {
   display: flex;
   justify-content: flex-start;
   width: calc(100% - 16px);
@@ -398,7 +398,11 @@ h1 {
   text-align: left;
   white-space: normal;
 }
-.workspace-home > .showcase-launcher:hover {
+.workspace-home .showcase-launcher:hover {
   background: var(--atlas-surface-hover, #f5f7fa);
   border-color: var(--atlas-accent);
 }
+
+.quote-product-picker{display:grid;gap:8px;margin:18px 0 24px;padding:16px;background:#f7f8fc;border:1px solid #e6e9f2;border-radius:9px}.quote-product-picker small{color:#64748b;font-size:12px}.quote-product-picker label{font-weight:600}
+
+.workspace-learning{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:24px 0 0 16px}.workspace-learning .showcase-launcher{margin:0;width:100%}

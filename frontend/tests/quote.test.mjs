@@ -1,6 +1,6 @@
 import '@angular/compiler';
 import {test} from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
-import {quoteTotals,quoteInput,newQuote,validateQuote} from '../projects/erp/src/sales/quote-model.ts';
+import {quoteTotals,quoteInput,newQuote,validateQuote,appendCatalogProduct} from '../projects/erp/src/sales/quote-model.ts';
 import {parseDecimalUnits,formatDecimalUnits} from '../projects/contracts/dist/index.js';
 import {RecordDraft} from '../dist/angular/fesm2022/bqatlas-angular.mjs';
 const fixtures=JSON.parse(readFileSync(new URL('../../contracts/v1/fixtures/quote-totals.json',import.meta.url),'utf8'));
@@ -25,4 +25,18 @@ test('quote validation catches invalid headers and lines before JSON binding',()
  value.customerId=crypto.randomUUID();value.date='2026-09-26';value.lines[0]={...value.lines[0],description:'Widget',quantity:'2.125',unitPrice:'12.3456'};
  assert.deepEqual(validateQuote(value),{});
  value.lines=[];assert.deepEqual(Object.keys(validateQuote(value)),['lines']);
+});
+
+test('catalog selection snapshots exact prices and preserves existing quote lines',()=>{
+ const quote=newQuote();const product={name:'Consulting',unitPrice:'125.1234',currency:'USD',active:true};
+ const lines=appendCatalogProduct(quote,product);assert.equal(lines.length,1);assert.equal(lines[0].unitPrice,'125.1234');assert.equal(quote.lines[0].description,'');
+ product.name='Changed catalog';product.unitPrice='999';assert.equal(lines[0].description,'Consulting');assert.equal(lines[0].unitPrice,'125.1234');
+ const next=appendCatalogProduct({...quote,lines},product);assert.equal(next.length,2);assert.deepEqual(next[0],lines[0]);assert.notEqual(next[0].id,next[1].id);
+});
+test('catalog selection rejects inactive, wrong-currency, invalid-price and over-capacity products',()=>{
+ const quote=newQuote(),product={name:'Consulting',unitPrice:'125.1234',currency:'USD',active:true};
+ assert.throws(()=>appendCatalogProduct(quote,{...product,active:false}),/active product/);
+ assert.throws(()=>appendCatalogProduct(quote,{...product,currency:'EUR'}),/quote currency/);
+ assert.throws(()=>appendCatalogProduct(quote,{...product,unitPrice:'1e3'}),/invalid unit price/);
+ assert.throws(()=>appendCatalogProduct({...quote,lines:Array.from({length:100},()=>({...quote.lines[0]}))},product),/100 lines/);
 });

@@ -46,3 +46,7 @@ These examples are included in generated starters. Their data and drafts are loc
 In the running ERP sample, open **Sales quotes → New quote → Customer**. The lookup offers **Search more…** for a paged picker and **Create Customer…** for the normal customer form. **Save & select** returns the customer to the unsaved quote. The adjacent **Open Customer** button opens the selected customer for permitted viewing/editing. Quote lines remain in the parent draft.
 
 Lookup access does not grant full customer read/write access. Quick name-only creation is intentionally unavailable. See [the relational lookup study and implementation notes](ODOO-RELATIONAL-LOOKUP-STUDY.md) for contracts, lifecycle rules and remaining metadata/scaffolding work.
+
+## Connected CRM and individual controls
+
+The [CRM demo guide](CRM-DEMO.md) describes persistent customers, catalog products, opportunities, activities and sales quotes. Open **Control documentation** for individual live controls with usage snippets; open **Forms & controls** for the composite examples described above.

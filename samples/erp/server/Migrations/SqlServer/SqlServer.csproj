@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><IsPackable>false</IsPackable><GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles><AssemblyName>BqAtlas.Sample.Migrations.SqlServer</AssemblyName></PropertyGroup><ItemGroup><ProjectReference Include="../../Modules/Sales/Sales.csproj" />
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><IsPackable>false</IsPackable><GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles><AssemblyName>BqAtlas.Sample.Migrations.SqlServer</AssemblyName></PropertyGroup><ItemGroup><ProjectReference Include="../../Modules/Engagement/Engagement.csproj"/><ProjectReference Include="../../Modules/Sales/Sales.csproj" />
 <ProjectReference Include="../../../../../backend/src/BqAtlas.Identity/BqAtlas.Identity.csproj" />
 <ProjectReference Include="../../Modules/Crm/Crm.csproj" />
 <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />

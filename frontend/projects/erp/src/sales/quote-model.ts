@@ -96,17 +96,63 @@ export function newQuote(): QuoteRecord {
 
 export function validateQuote(input: QuoteInput): Record<string, string[]> {
   const errors: Record<string, string[]> = {};
-  if (!input.customerId) errors['customerId'] = ['Choose a customer.'];
-  const date = new Date(input.date + 'T00:00:00Z');
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.date) || !Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== input.date || input.date < '1900-01-01') errors['date'] = ['Choose a valid date from 1900 onwards.'];
-  if (!['USD', 'EUR', 'BDT'].includes(input.currency)) errors['currency'] = ['Choose USD, EUR or BDT.'];
-  if (input.lines.length < 1 || input.lines.length > 100) errors['lines'] = ['A quote needs between 1 and 100 lines.'];
+  if (!input.customerId) errors["customerId"] = ["Choose a customer."];
+  const date = new Date(input.date + "T00:00:00Z");
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/.test(input.date) ||
+    !Number.isFinite(date.getTime()) ||
+    date.toISOString().slice(0, 10) !== input.date ||
+    input.date < "1900-01-01"
+  )
+    errors["date"] = ["Choose a valid date from 1900 onwards."];
+  if (!["USD", "EUR", "BDT"].includes(input.currency))
+    errors["currency"] = ["Choose USD, EUR or BDT."];
+  if (input.lines.length < 1 || input.lines.length > 100)
+    errors["lines"] = ["A quote needs between 1 and 100 lines."];
   input.lines.forEach((line, index) => {
     const prefix = `lines[${index}]`;
-    if (!line.description.trim() || line.description.trim().length > 200) errors[prefix + '.description'] = ['Use a description of 1–200 characters.'];
-    const quantity = parseDecimalUnits(line.quantity, 3, '1000000');
-    if (quantity === null || quantity === 0n) errors[prefix + '.quantity'] = ['Use a positive decimal up to 1000000 with at most 3 decimal places.'];
-    if (parseDecimalUnits(line.unitPrice, 4, '1000000000') === null) errors[prefix + '.unitPrice'] = ['Use a decimal from 0 to 1000000000 with at most 4 decimal places.'];
+    if (!line.description.trim() || line.description.trim().length > 200)
+      errors[prefix + ".description"] = [
+        "Use a description of 1–200 characters.",
+      ];
+    const quantity = parseDecimalUnits(line.quantity, 3, "1000000");
+    if (quantity === null || quantity === 0n)
+      errors[prefix + ".quantity"] = [
+        "Use a positive decimal up to 1000000 with at most 3 decimal places.",
+      ];
+    if (parseDecimalUnits(line.unitPrice, 4, "1000000000") === null)
+      errors[prefix + ".unitPrice"] = [
+        "Use a decimal from 0 to 1000000000 with at most 4 decimal places.",
+      ];
   });
   return errors;
+}
+
+/** Catalog selection takes a snapshot; later catalog edits never rewrite a quote. */
+export function appendCatalogProduct(
+  quote: Pick<QuoteInput, "currency" | "lines">,
+  product: {
+    name: string;
+    unitPrice: string;
+    currency: string;
+    active: boolean;
+  },
+): QuoteLine[] {
+  if (!product.active || product.currency !== quote.currency)
+    throw new Error("Choose an active product in the quote currency.");
+  if (quote.lines.length >= 100)
+    throw new Error("A quote supports up to 100 lines.");
+  if (parseDecimalUnits(product.unitPrice, 4, "1000000000") === null)
+    throw new Error("The catalog product has an invalid unit price.");
+  const line = {
+    id: crypto.randomUUID(),
+    description: product.name,
+    quantity: "1",
+    unitPrice: product.unitPrice,
+  };
+  return quote.lines.length === 1 &&
+    !quote.lines[0].description.trim() &&
+    quote.lines[0].unitPrice === "0"
+    ? [line]
+    : [...quote.lines, line];
 }

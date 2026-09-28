@@ -48,6 +48,7 @@ import {
   quoteInput,
   quoteTotals,
   validateQuote,
+  appendCatalogProduct,
 } from "./quote-model";
 const endpoint = "/api/v1/sales/quotes";
 @Component({
@@ -57,6 +58,16 @@ const endpoint = "/api/v1/sales/quotes";
   template: `<section class="bqatlas-view">
     <header class="bqatlas-toolbar">
       <strong>Sales quotes</strong><span class="bqatlas-spacer"></span>
+      @if (session.has("crm.customers.read")) {
+        <button atlasButton (click)="crud.openList('crm.customers')">
+          Customers ↗
+        </button>
+      }
+      @if (session.has("engagement.products.read")) {
+        <button atlasButton (click)="crud.openList('engagement.products')">
+          Products ↗
+        </button>
+      }
       @if (
         session.has("sales.quotes.write") && session.has("crm.customers.lookup")
       ) {
@@ -75,6 +86,8 @@ const endpoint = "/api/v1/sales/quotes";
       [total]="total()"
       [pageSize]="25"
       [filterable]="true"
+      [columnManage]="true"
+      [multiSort]="true"
       [loading]="loading()"
       [error]="error()"
       (queryChange)="query($event)"
@@ -101,7 +114,13 @@ export class QuoteList {
     { key: "customerName", label: "Customer" },
     { key: "date", label: "Date", width: 115 },
     { key: "currency", label: "Currency", sortable: false, width: 80 },
-    { key: "status", label: "Status", width: 110 },
+    {
+      key: "status",
+      label: "Status",
+      width: 110,
+      badge: true,
+      tone: (row) => (row.status === "submitted" ? "success" : "info"),
+    },
     {
       key: "total",
       label: "Amount",
@@ -265,9 +284,11 @@ export class QuoteList {
               [attr.aria-describedby]="task.id + '-date-error'"
               [ngModel]="draft.value().date"
               (ngModelChange)="change('date', $event)"
-            /><small class="bqatlas-field-error" [id]="task.id + '-date-error'">{{
-              errors()["date"]?.join(" ")
-            }}</small>
+            /><small
+              class="bqatlas-field-error"
+              [id]="task.id + '-date-error'"
+              >{{ errors()["date"]?.join(" ") }}</small
+            >
           </div>
           <div>
             <label [for]="task.id + '-currency'">Currency</label
@@ -283,11 +304,38 @@ export class QuoteList {
               <option value="USD">USD</option>
               <option value="EUR">EUR</option>
               <option value="BDT">BDT</option></select
-            ><small class="bqatlas-field-error" [id]="task.id + '-currency-error'">{{
-              errors()["currency"]?.join(" ")
-            }}</small>
+            ><small
+              class="bqatlas-field-error"
+              [id]="task.id + '-currency-error'"
+              >{{ errors()["currency"]?.join(" ") }}</small
+            >
           </div>
         </div>
+        @if (canEdit() && session.has("engagement.products.read")) {
+          <div class="quote-product-picker">
+            <label [for]="task.id + '-product'">Add from product catalog</label>
+            <bqatlas-reference-lookup
+              [controlId]="task.id + '-product'"
+              label="Product"
+              resource="engagement.products"
+              nameField="name"
+              [provider]="products"
+              [columns]="productColumns"
+              [recordKey]="productKey"
+              [displayWith]="productLabel"
+              [value]="null"
+              [contextKey]="draft.value().currency"
+              (recordSelected)="addProduct($event)"
+              [disabled]="
+                loading() || task.saving() || draft.value().lines.length >= 100
+              "
+            />
+            <small
+              >Copies the catalog description and price. Choose an active
+              product in {{ draft.value().currency }}.</small
+            >
+          </div>
+        }
         <div class="quote-lines-heading">
           <strong>Quote lines</strong><span class="bqatlas-spacer"></span
           ><span>Quantity: 3 decimals · Unit price: 4 decimals</span>
@@ -304,7 +352,9 @@ export class QuoteList {
             </button>
           }
         </div>
-        <small class="bqatlas-field-error" [id]="task.id + '-lines-error'">{{ errors()["lines"]?.join(" ") }}</small>
+        <small class="bqatlas-field-error" [id]="task.id + '-lines-error'">{{
+          errors()["lines"]?.join(" ")
+        }}</small>
         <div class="quote-sheet-scroll">
           <table atlasDatasheet class="quote-sheet" aria-label="Quote lines">
             <thead>
@@ -334,15 +384,19 @@ export class QuoteList {
                       [name]="'description-' + line.id"
                       [attr.aria-label]="'Line ' + (i + 1) + ' description'"
                       [attr.aria-invalid]="!!lineError(i, 'description')"
-                      [attr.aria-describedby]="task.id + '-' + line.id + '-description-error'"
+                      [attr.aria-describedby]="
+                        task.id + '-' + line.id + '-description-error'
+                      "
                       [ngModel]="line.description"
                       (ngModelChange)="
                         lineChange(line.id, 'description', $event)
                       "
                       maxlength="200"
-                    /><small class="bqatlas-field-error" [id]="task.id + '-' + line.id + '-description-error'">{{
-                      lineError(i, "description")
-                    }}</small>
+                    /><small
+                      class="bqatlas-field-error"
+                      [id]="task.id + '-' + line.id + '-description-error'"
+                      >{{ lineError(i, "description") }}</small
+                    >
                   </td>
                   <td>
                     <bqatlas-decimal-input
@@ -356,10 +410,14 @@ export class QuoteList {
                       maximum="1000000"
                       [readonly]="!canEdit()"
                       [invalid]="!!lineError(i, 'quantity')"
-                      [describedBy]="task.id + '-' + line.id + '-quantity-error'"
-                    /><small class="bqatlas-field-error" [id]="task.id + '-' + line.id + '-quantity-error'">{{
-                      lineError(i, "quantity")
-                    }}</small>
+                      [describedBy]="
+                        task.id + '-' + line.id + '-quantity-error'
+                      "
+                    /><small
+                      class="bqatlas-field-error"
+                      [id]="task.id + '-' + line.id + '-quantity-error'"
+                      >{{ lineError(i, "quantity") }}</small
+                    >
                   </td>
                   <td>
                     <bqatlas-decimal-input
@@ -373,10 +431,14 @@ export class QuoteList {
                       maximum="1000000000"
                       [readonly]="!canEdit()"
                       [invalid]="!!lineError(i, 'unitPrice')"
-                      [describedBy]="task.id + '-' + line.id + '-unitPrice-error'"
-                    /><small class="bqatlas-field-error" [id]="task.id + '-' + line.id + '-unitPrice-error'">{{
-                      lineError(i, "unitPrice")
-                    }}</small>
+                      [describedBy]="
+                        task.id + '-' + line.id + '-unitPrice-error'
+                      "
+                    /><small
+                      class="bqatlas-field-error"
+                      [id]="task.id + '-' + line.id + '-unitPrice-error'"
+                      >{{ lineError(i, "unitPrice") }}</small
+                    >
                   </td>
                   <td class="quote-amount">{{ totals().lines[i] ?? "—" }}</td>
                   <td>
@@ -429,10 +491,19 @@ export class QuoteEditor {
   private readonly element = inject(ElementRef<HTMLElement>);
   private readonly injector = inject(Injector);
   private focusError() {
-    afterNextRender(() => {
-      if (this.controller.signal.aborted || this.workspace.activeId() !== this.task.id) return;
-      (this.element.nativeElement as HTMLElement).querySelector<HTMLElement>('[aria-invalid="true"]')?.focus();
-    }, { injector: this.injector });
+    afterNextRender(
+      () => {
+        if (
+          this.controller.signal.aborted ||
+          this.workspace.activeId() !== this.task.id
+        )
+          return;
+        (this.element.nativeElement as HTMLElement)
+          .querySelector<HTMLElement>('[aria-invalid="true"]')
+          ?.focus();
+      },
+      { injector: this.injector },
+    );
   }
   readonly task = inject(ATLAS_TASK) as WorkspaceTask<EditorTask>;
   readonly session = inject(AtlasSession);
@@ -465,6 +536,30 @@ export class QuoteEditor {
       .filter(Boolean)
       .join(" · "),
   );
+  readonly products = new RestLookupProvider<ProductOption>(
+    this.api,
+    "/api/v1/engagement/products/lookup",
+  );
+  readonly productColumns = [
+    { key: "code" as const, label: "SKU", width: 100 },
+    { key: "name" as const, label: "Product" },
+    { key: "unitPrice" as const, label: "Price", width: 100 },
+    { key: "currency" as const, label: "Currency", width: 75 },
+  ];
+  readonly productKey = (row: ProductOption) => row.id;
+  readonly productLabel = (row: ProductOption) => row.code + " · " + row.name;
+  addProduct(row: ProductOption | null) {
+    if (!row || !this.canEdit() || this.loading() || this.task.saving()) return;
+    try {
+      this.change("lines", appendCatalogProduct(this.draft.value(), row));
+      this.task.error.set("");
+    } catch (error) {
+      this.task.error.set(
+        error instanceof Error ? error.message : "Unable to add product.",
+      );
+    }
+  }
+
   readonly customers = new RestLookupProvider<CustomerOption>(
     this.api,
     "/api/v1/crm/customers/lookup",
@@ -482,7 +577,10 @@ export class QuoteEditor {
   private readonly controller = new AbortController();
   id = this.task.data().id;
   constructor() {
-    this.draft.initialize(newQuote());
+    this.draft.initialize({
+      ...newQuote(),
+      ...this.task.data().defaults,
+    } as QuoteRecord);
     if (this.id) this.draft.dirty.set(false);
     this.task.lifecycle.save = () => this.persist();
     this.task.lifecycle.dispose = () => this.controller.abort();
@@ -559,7 +657,10 @@ export class QuoteEditor {
       return;
     if (this.id) await this.load();
     else {
-      this.draft.initialize(newQuote());
+      this.draft.initialize({
+        ...newQuote(),
+        ...this.task.data().defaults,
+      } as QuoteRecord);
       this.errors.set({});
       this.task.error.set("");
     }
@@ -585,7 +686,7 @@ export class QuoteEditor {
     if (Object.keys(errors).length) {
       this.errors.set(errors);
       this.focusError();
-      throw new Error('Correct the highlighted quote fields.');
+      throw new Error("Correct the highlighted quote fields.");
     }
     try {
       const record = this.id
@@ -692,3 +793,12 @@ export const salesFeature: CrudFeature = {
   listComponent: QuoteList,
   editorComponent: QuoteEditor,
 };
+
+interface ProductOption {
+  id: string;
+  code: string;
+  name: string;
+  unitPrice: string;
+  currency: string;
+  active: boolean;
+}

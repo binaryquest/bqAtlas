@@ -119,3 +119,7 @@ Package installation and coordinated upgrade guidance: [docs/PACKAGES.md](docs/P
 ## License and repository
 
 MIT licensed — see [LICENSE](LICENSE). The canonical repository is [binaryquest/bqAtlas](https://github.com/binaryquest/bqAtlas). npm and NuGet publication are deferred; use the local package workflow for this preview. Both database providers are verified in CI.
+
+### CRM demo and control reference
+
+The sample includes customer master/detail, a sales pipeline, follow-up activities, a product catalog and product-assisted quotes. Open **Control documentation** for individual live controls and usage snippets. See the [CRM demo guide](docs/CRM-DEMO.md) for setup, demo data, permissions and scope.
